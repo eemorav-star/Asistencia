@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 
 # Datos de los estudiantes
 estudiantes = [
@@ -23,22 +24,24 @@ estudiantes = [
 # Inicializar el estado de la sesión
 if 'asistencias' not in st.session_state:
     st.session_state.asistencias = {}
-    # Inicializar todos los estudiantes como "Ausente" por defecto
     for estudiante in estudiantes:
         st.session_state.asistencias[estudiante["numero"]] = "Ausente"
 
-# Título de la aplicación
+# Título
 st.title("Control de Asistencia - Quinto Año A")
 
-# Mostrar la lista de estudiantes con botones
+# Fecha y hora actual
+now = datetime.now()
+fecha_hora = now.strftime("%d/%m/%Y %H:%M:%S")
+st.write(f"**Fecha y Hora:** {fecha_hora}")
+
+# Mostrar estudiantes
 st.subheader("Registro de Asistencia")
 
-# Usar un bucle for para mostrar cada estudiante
 for estudiante in estudiantes:
     num = estudiante["numero"]
     nombre = estudiante["nombre"]
     
-    # Crear una fila para cada estudiante
     col1, col2, col3, col4 = st.columns([1, 4, 1, 1])
     
     with col1:
@@ -46,30 +49,23 @@ for estudiante in estudiantes:
     with col2:
         st.write(nombre)
     with col3:
-        if st.button("✅ Presente", key=f"presente_{num}"):
+        if st.button("Presente", key=f"presente_{num}"):
             st.session_state.asistencias[num] = "Presente"
             st.rerun()
     with col4:
-        if st.button("⏰ Tardanza", key=f"tardanza_{num}"):
+        if st.button("Tardanza", key=f"tardanza_{num}"):
             st.session_state.asistencias[num] = "Tardanza"
             st.rerun()
     
     # Mostrar el estado actual
     estado = st.session_state.asistencias[num]
-    if estado == "Presente":
-        st.success(f"✅ {estado}")
-    elif estado == "Tardanza":
-        st.warning(f"⏰ {estado}")
-    else:
-        st.error(f"❌ {estado}")
+    st.write(f"Estado: {estado}")
 
-# Separador visual
 st.divider()
 
-# Botón para calcular estadísticas
-st.subheader("📊 Resumen de Asistencia")
+# Estadísticas
+st.subheader("Resumen de Asistencia")
 
-# Usar un bucle while para contar las asistencias
 contador_presentes = 0
 contador_tardanzas = 0
 contador_ausentes = 0
@@ -87,28 +83,25 @@ while i < len(estudiantes):
         contador_ausentes += 1
     i += 1
 
-# Mostrar los resultados en columnas
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric("✅ Presentes", contador_presentes)
+    st.metric("Presentes", contador_presentes)
 with col2:
-    st.metric("⏰ Tardanzas", contador_tardanzas)
+    st.metric("Tardanzas", contador_tardanzas)
 with col3:
-    st.metric("❌ Ausentes", contador_ausentes)
+    st.metric("Ausentes", contador_ausentes)
 
-# Botón para reiniciar la asistencia
-if st.button("🔄 Reiniciar Asistencia"):
+if st.button("Reiniciar Asistencia"):
     for estudiante in estudiantes:
         st.session_state.asistencias[estudiante["numero"]] = "Ausente"
     st.rerun()
 
-# Mostrar lista detallada (opcional)
-with st.expander("📋 Ver lista completa de asistencias"):
-    # Crear un DataFrame para mostrar los datos
+# Mostrar lista detallada
+with st.expander("Ver lista completa de asistencias"):
     data = []
     for estudiante in estudiantes:
         data.append({
-            "N°": estudiante["numero"],
+            "Numero": estudiante["numero"],
             "Nombre": estudiante["nombre"],
             "Estado": st.session_state.asistencias[estudiante["numero"]]
         })
