@@ -49,6 +49,35 @@ GrupoB = [
     {"numero": 15, "nombre": "GRAJALES JULIO"}
 ]
 
+GrupoC = [
+    {"numero": 1, "nombre": "ABREGO IVELIN"},
+    {"numero": 2, "nombre": "AGAMES MELANY"},
+    {"numero": 3, "nombre": "BECERRA LIZETH"},
+    {"numero": 4, "nombre": "BERROCAL MARIEL"},
+    {"numero": 5, "nombre": "CALDERON MERYLIN"},
+    {"numero": 6, "nombre": "CANO JOSEPH"},
+    {"numero": 7, "nombre": "CARDENAS JAIME"},
+    {"numero": 8, "nombre": "CASTILLO MARIBEL"},
+    {"numero": 9, "nombre": "DE LA ROSA GRETTELL"},
+    {"numero": 10, "nombre": "DIAZ XAVIER"},
+    {"numero": 11, "nombre": "DIAZ DANITZA"},
+    {"numero": 12, "nombre": "DUARTE LUIS"},
+    {"numero": 13, "nombre": "ESQUIVEL ADAN"},
+    {"numero": 14, "nombre": "GARCIA JAIRO"},
+    {"numero": 15, "nombre": "GRIFFITH SANDIVEL"},
+    {"numero": 16, "nombre": "IBARRA JOSE"}
+]
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Diccionario para mapear grupos
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+Grupos = {
+    "A": GrupoA,
+    "B": GrupoB,
+    "C": GrupoC
+}
+
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Inicializar estado de la sesion
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
@@ -69,10 +98,7 @@ if 'Asistencias' not in st.session_state:
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def CambiarGrupo(grupo):
-    if grupo == "A":
-        st.session_state.EstudiantesActuales = GrupoA
-    else:
-        st.session_state.EstudiantesActuales = GrupoB
+    st.session_state.EstudiantesActuales = Grupos[grupo]
     
     # Reiniciar asistencias para el nuevo grupo
     st.session_state.Asistencias = {}
@@ -94,8 +120,8 @@ with col1:
 with col2:
     grupo = st.radio(
         "Selecciona el grupo",
-        ["A", "B"],
-        index=0 if st.session_state.GrupoSeleccionado == "A" else 1,
+        ["A", "B", "C"],
+        index=0 if st.session_state.GrupoSeleccionado == "A" else 1 if st.session_state.GrupoSeleccionado == "B" else 2,
         horizontal=True,
         key="SelectorGrupo"
     )
