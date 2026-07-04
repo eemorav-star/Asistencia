@@ -10,10 +10,10 @@ from datetime import datetime
 import openpyxl
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Datos de los estudiantes
+# Datos de los estudiantes por grupo
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-estudiantes = [
+GrupoA = [
     {"numero": 1, "nombre": "ALMANZA ABDUL"},
     {"numero": 2, "nombre": "ALVAEZ LINDA"},
     {"numero": 3, "nombre": "AMORES BETZY"},
@@ -31,24 +31,90 @@ estudiantes = [
     {"numero": 15, "nombre": "HERMANDEZ MARISABEL"}
 ]
 
+GrupoB = [
+    {"numero": 1, "nombre": "ADAMES CHRISTIE"},
+    {"numero": 2, "nombre": "ALONSO GISSETH"},
+    {"numero": 3, "nombre": "BERNAL EDWARD"},
+    {"numero": 4, "nombre": "BERROCAL MACIEL"},
+    {"numero": 5, "nombre": "CAMARENA ZORAIDA"},
+    {"numero": 6, "nombre": "CAMPOS PHILLIPS"},
+    {"numero": 7, "nombre": "CARRASCO OLIVER"},
+    {"numero": 8, "nombre": "CEDEÑO LEYDIE"},
+    {"numero": 9, "nombre": "CHUNG KARLA"},
+    {"numero": 10, "nombre": "ESPINOSA MILEYKA"},
+    {"numero": 11, "nombre": "FARRUGIA STEPAHANY"},
+    {"numero": 12, "nombre": "FRANCO PEDRO"},
+    {"numero": 13, "nombre": "GOMEZ ROSA"},
+    {"numero": 14, "nombre": "GOMEZ PAOLO"},
+    {"numero": 15, "nombre": "GRAJALES JULIO"}
+]
+
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Inicializar el estado de la sesion
+# Inicializar estado de la sesion
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-if 'asistencias' not in st.session_state:
-    st.session_state.asistencias = {}
-    for estudiante in estudiantes:
-        st.session_state.asistencias[estudiante["numero"]] = "Ausente"
+if 'GrupoSeleccionado' not in st.session_state:
+    st.session_state.GrupoSeleccionado = "A"
+
+if 'EstudiantesActuales' not in st.session_state:
+    st.session_state.EstudiantesActuales = GrupoA
+
+if 'Asistencias' not in st.session_state:
+    st.session_state.Asistencias = {}
+    for estudiante in GrupoA:
+        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Titulo y fecha/hora
+# Funcion para cambiar de grupo
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-st.title("Control de Asistencia - Quinto Año A")
+def CambiarGrupo(grupo):
+    if grupo == "A":
+        st.session_state.EstudiantesActuales = GrupoA
+    else:
+        st.session_state.EstudiantesActuales = GrupoB
+    
+    # Reiniciar asistencias para el nuevo grupo
+    st.session_state.Asistencias = {}
+    for estudiante in st.session_state.EstudiantesActuales:
+        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
+    
+    st.session_state.GrupoSeleccionado = grupo
+    st.rerun()
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Selector de grupo
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+st.title("Control de Asistencia - Quinto Año")
+
+col1, col2 = st.columns([1, 3])
+with col1:
+    st.write("**Seleccionar Grupo:**")
+with col2:
+    grupo = st.radio(
+        "Selecciona el grupo",
+        ["A", "B"],
+        index=0 if st.session_state.GrupoSeleccionado == "A" else 1,
+        horizontal=True,
+        key="SelectorGrupo"
+    )
+
+# Verificar si cambio el grupo
+if grupo != st.session_state.GrupoSeleccionado:
+    CambiarGrupo(grupo)
+
+st.write(f"**Grupo {st.session_state.GrupoSeleccionado} - {len(st.session_state.EstudiantesActuales)} estudiantes**")
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Fecha y hora
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 now = datetime.now()
-fecha_hora = now.strftime("%d/%m/%Y %H:%M:%S")
-st.write(f"**Fecha y Hora:** {fecha_hora}")
+FechaHora = now.strftime("%d/%m/%Y %H:%M:%S")
+st.write(f"**Fecha y Hora:** {FechaHora}")
+
+st.divider()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Registro de Asistencia
@@ -56,7 +122,7 @@ st.write(f"**Fecha y Hora:** {fecha_hora}")
 
 st.subheader("Registro de Asistencia")
 
-for estudiante in estudiantes:
+for estudiante in st.session_state.EstudiantesActuales:
     num = estudiante["numero"]
     nombre = estudiante["nombre"]
     
@@ -67,12 +133,12 @@ for estudiante in estudiantes:
     with col2:
         st.write(nombre)
     with col3:
-        if st.button("Presente", key=f"presente_{num}"):
-            st.session_state.asistencias[num] = "Presente"
+        if st.button("Presente", key=f"Presente_{num}_{st.session_state.GrupoSeleccionado}"):
+            st.session_state.Asistencias[num] = "Presente"
             st.rerun()
     with col4:
-        if st.button("Tardanza", key=f"tardanza_{num}"):
-            st.session_state.asistencias[num] = "Tardanza"
+        if st.button("Tardanza", key=f"Tardanza_{num}_{st.session_state.GrupoSeleccionado}"):
+            st.session_state.Asistencias[num] = "Tardanza"
             st.rerun()
 
 st.divider()
@@ -83,36 +149,36 @@ st.divider()
 
 st.subheader("Resumen de Asistencia")
 
-contador_presentes = 0
-contador_tardanzas = 0
-contador_ausentes = 0
+ContadorPresentes = 0
+ContadorTardanzas = 0
+ContadorAusentes = 0
 i = 0
 
-while i < len(estudiantes):
-    num = estudiantes[i]["numero"]
-    estado = st.session_state.asistencias[num]
+while i < len(st.session_state.EstudiantesActuales):
+    num = st.session_state.EstudiantesActuales[i]["numero"]
+    estado = st.session_state.Asistencias[num]
     
     if estado == "Presente":
-        contador_presentes += 1
+        ContadorPresentes += 1
     elif estado == "Tardanza":
-        contador_tardanzas += 1
+        ContadorTardanzas += 1
     else:
-        contador_ausentes += 1
+        ContadorAusentes += 1
     i += 1
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric("Presentes", contador_presentes)
+    st.metric("Presentes", ContadorPresentes)
 with col2:
-    st.metric("Tardanzas", contador_tardanzas)
+    st.metric("Tardanzas", ContadorTardanzas)
 with col3:
-    st.metric("Ausentes", contador_ausentes)
+    st.metric("Ausentes", ContadorAusentes)
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Boton para reiniciar
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 if st.button("Reiniciar Asistencia"):
-    for estudiante in estudiantes:
-        st.session_state.asistencias[estudiante["numero"]] = "Ausente"
+    for estudiante in st.session_state.EstudiantesActuales:
+        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
     st.rerun()
