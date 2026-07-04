@@ -1,9 +1,19 @@
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Universidad Tecnológica de Panamá 
+# Semestral de Herramientas de programacion 1
+# Integrantes: Jaen kathya, Luna Adrian, Mora Elpidio
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
 import streamlit as st
 import pandas as pd
+from datetime import datetime
+import openpyxl
 
-# Datos de los estudiantes
-estudiantes = [
-    {"numero": 1, "nombre": "ALMANZA ABDUL"},
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Lista con los nombres de los studiantes
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+Estudiantes = [ {"numero": 1, "nombre": "ALMANZA ABDUL"},
     {"numero": 2, "nombre": "ALVAEZ LINDA"},
     {"numero": 3, "nombre": "AMORES BETZY"},
     {"numero": 4, "nombre": "APARICIO KARLA"},
@@ -17,28 +27,41 @@ estudiantes = [
     {"numero": 12, "nombre": "FRANCO GISELLE"},
     {"numero": 13, "nombre": "GONZALEZ JOSE"},
     {"numero": 14, "nombre": "HERNANDEZ VLADIMIR"},
-    {"numero": 15, "nombre": "HERMANDEZ MARISABEL"}
-]
+    {"numero": 15, "nombre": "HERMANDEZ MARISABEL"} ]
 
-# Inicializar el estado de la sesión
-if 'asistencias' not in st.session_state:
-    st.session_state.asistencias = {}
-    # Inicializar todos los estudiantes como "Ausente" por defecto
-    for estudiante in estudiantes:
-        st.session_state.asistencias[estudiante["numero"]] = "Ausente"
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Inicializar el estado de la sesion
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-# Título de la aplicación
-st.title("📋 Control de Asistencia - Quinto Año A")
+if 'Asistencias' not in st.session_state:
+    st.session_state.Asistencias = {}
+    for estudiante in Estudiantes:
+        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
 
-# Mostrar la lista de estudiantes con botones
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Titulo de la aplicacion asistencia
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+st.title("Control de Asistencia - Quinto Año A")
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Fecha y hora actual
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+now = datetime.now()
+FechaHora = now.strftime("%d/%m/%Y %H:%M:%S")
+st.write(f"**Fecha y Hora:** {FechaHora}")
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Registro de la asistencia
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
 st.subheader("Registro de Asistencia")
 
-# Usar un bucle for para mostrar cada estudiante
-for estudiante in estudiantes:
+for estudiante in Estudiantes:
     num = estudiante["numero"]
     nombre = estudiante["nombre"]
     
-    # Crear una fila para cada estudiante
     col1, col2, col3, col4 = st.columns([1, 4, 1, 1])
     
     with col1:
@@ -46,71 +69,67 @@ for estudiante in estudiantes:
     with col2:
         st.write(nombre)
     with col3:
-        if st.button("✅ Presente", key=f"presente_{num}"):
-            st.session_state.asistencias[num] = "Presente"
+        if st.button("Presente", key=f"Presente_{num}"):
+            st.session_state.Asistencias[num] = "Presente"
             st.rerun()
     with col4:
-        if st.button("⏰ Tardanza", key=f"tardanza_{num}"):
-            st.session_state.asistencias[num] = "Tardanza"
+        if st.button("Tardanza", key=f"Tardanza_{num}"):
+            st.session_state.Asistencias[num] = "Tardanza"
             st.rerun()
-    
-    # Mostrar el estado actual
-    estado = st.session_state.asistencias[num]
-    if estado == "Presente":
-        st.success(f"✅ {estado}")
-    elif estado == "Tardanza":
-        st.warning(f"⏰ {estado}")
-    else:
-        st.error(f"❌ {estado}")
 
-# Separador visual
 st.divider()
 
-# Botón para calcular estadísticas
-st.subheader("📊 Resumen de Asistencia")
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Resumen final de la asistencia
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-# Usar un bucle while para contar las asistencias
-contador_presentes = 0
-contador_tardanzas = 0
-contador_ausentes = 0
+st.subheader("Resumen de Asistencia")
+
+ContadorPresentes = 0
+ContadorTardanzas = 0
+ContadorAusentes = 0
 i = 0
 
-while i < len(estudiantes):
-    num = estudiantes[i]["numero"]
-    estado = st.session_state.asistencias[num]
+while i < len(Estudiantes):
+    num = Estudiantes[i]["numero"]
+    estado = st.session_state.Asistencias[num]
     
     if estado == "Presente":
-        contador_presentes += 1
+        ContadorPresentes += 1
     elif estado == "Tardanza":
-        contador_tardanzas += 1
+        ContadorTardanzas += 1
     else:
-        contador_ausentes += 1
+        ContadorAusentes += 1
     i += 1
 
-# Mostrar los resultados en columnas
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric("✅ Presentes", contador_presentes)
+    st.metric("Presentes", ContadorPresentes)
 with col2:
-    st.metric("⏰ Tardanzas", contador_tardanzas)
+    st.metric("Tardanzas", ContadorTardanzas)
 with col3:
-    st.metric("❌ Ausentes", contador_ausentes)
+    st.metric("Ausentes", ContadorAusentes)
 
-# Botón para reiniciar la asistencia
-if st.button("🔄 Reiniciar Asistencia"):
-    for estudiante in estudiantes:
-        st.session_state.asistencias[estudiante["numero"]] = "Ausente"
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Botón para volver a reiniciar la asistencia
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+if st.button("Reiniciar Asistencia"):
+    for estudiante in Estudiantes:
+        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
     st.rerun()
 
-# Mostrar lista detallada (opcional)
-with st.expander("📋 Ver lista completa de asistencias"):
-    # Crear un DataFrame para mostrar los datos
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Lista detallada de asistencias
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+with st.expander("Ver lista completa de asistencias"):
     data = []
-    for estudiante in estudiantes:
+    for estudiante in Estudiantes:
         data.append({
-            "N°": estudiante["numero"],
+            "Numero": estudiante["numero"],
             "Nombre": estudiante["nombre"],
-            "Estado": st.session_state.asistencias[estudiante["numero"]]
+            "Estado": st.session_state.Asistencias[estudiante["numero"]]
         })
     df = pd.DataFrame(data)
     st.dataframe(df)
