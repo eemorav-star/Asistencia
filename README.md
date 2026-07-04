@@ -1,10 +1,10 @@
 # Asistencia
 app para pasar asistencia en tiempo real
-# 📋 Control de Asistencia - Quinto Año A
+#  Control de Asistencia - Quinto Año A
 
 Aplicación web para registrar la asistencia de estudiantes de Quinto Año A.
 
-## 🚀 Características
+##  Características
 - Registro individual de asistencia (Presente / Tardanza / Ausente)
 - Resumen automático con conteo de presentes, tardanzas y ausentes
 - Interfaz amigable y adaptable a celulares
