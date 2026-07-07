@@ -5,15 +5,15 @@
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 import streamlit as st
-import pandas as pd
+import pandas as pd   # A futuro necesitaremos esta libreria 
 from datetime import datetime
-import openpyxl
+import openpyxl   # A futuro necesitaremos esta libreria para leer y escribir en Excel
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Datos de los estudiantes por grupo
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+#oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Datos de los estudiantes
+#oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-GrupoA = [
+estudiantes = [
     {"numero": 1, "nombre": "ALMANZA ABDUL"},
     {"numero": 2, "nombre": "ALVAEZ LINDA"},
     {"numero": 3, "nombre": "AMORES BETZY"},
@@ -31,116 +31,24 @@ GrupoA = [
     {"numero": 15, "nombre": "HERMANDEZ MARISABEL"}
 ]
 
-GrupoB = [
-    {"numero": 1, "nombre": "ADAMES CHRISTIE"},
-    {"numero": 2, "nombre": "ALONSO GISSETH"},
-    {"numero": 3, "nombre": "BERNAL EDWARD"},
-    {"numero": 4, "nombre": "BERROCAL MACIEL"},
-    {"numero": 5, "nombre": "CAMARENA ZORAIDA"},
-    {"numero": 6, "nombre": "CAMPOS PHILLIPS"},
-    {"numero": 7, "nombre": "CARRASCO OLIVER"},
-    {"numero": 8, "nombre": "CEDEÑO LEYDIE"},
-    {"numero": 9, "nombre": "CHUNG KARLA"},
-    {"numero": 10, "nombre": "ESPINOSA MILEYKA"},
-    {"numero": 11, "nombre": "FARRUGIA STEPAHANY"},
-    {"numero": 12, "nombre": "FRANCO PEDRO"},
-    {"numero": 13, "nombre": "GOMEZ ROSA"},
-    {"numero": 14, "nombre": "GOMEZ PAOLO"},
-    {"numero": 15, "nombre": "GRAJALES JULIO"}
-]
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Inicializar el estado de la sesion
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-GrupoC = [
-    {"numero": 1, "nombre": "ABREGO IVELIN"},
-    {"numero": 2, "nombre": "AGAMES MELANY"},
-    {"numero": 3, "nombre": "BECERRA LIZETH"},
-    {"numero": 4, "nombre": "BERROCAL MARIEL"},
-    {"numero": 5, "nombre": "CALDERON MERYLIN"},
-    {"numero": 6, "nombre": "CANO JOSEPH"},
-    {"numero": 7, "nombre": "CARDENAS JAIME"},
-    {"numero": 8, "nombre": "CASTILLO MARIBEL"},
-    {"numero": 9, "nombre": "DE LA ROSA GRETTELL"},
-    {"numero": 10, "nombre": "DIAZ XAVIER"},
-    {"numero": 11, "nombre": "DIAZ DANITZA"},
-    {"numero": 12, "nombre": "DUARTE LUIS"},
-    {"numero": 13, "nombre": "ESQUIVEL ADAN"},
-    {"numero": 14, "nombre": "GARCIA JAIRO"},
-    {"numero": 15, "nombre": "GRIFFITH SANDIVEL"},
-    {"numero": 16, "nombre": "IBARRA JOSE"}
-]
+if 'asistencias' not in st.session_state:
+    st.session_state.asistencias = {}
+    for estudiante in estudiantes:
+        st.session_state.asistencias[estudiante["numero"]] = "Ausente"
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Diccionario para mapear grupos
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Titulo y fecha/hora
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-Grupos = {
-    "A": GrupoA,
-    "B": GrupoB,
-    "C": GrupoC
-}
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Inicializar estado de la sesion
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-if 'GrupoSeleccionado' not in st.session_state:
-    st.session_state.GrupoSeleccionado = "A"
-
-if 'EstudiantesActuales' not in st.session_state:
-    st.session_state.EstudiantesActuales = GrupoA
-
-if 'Asistencias' not in st.session_state:
-    st.session_state.Asistencias = {}
-    for estudiante in GrupoA:
-        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Funcion para cambiar de grupo
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-def CambiarGrupo(grupo):
-    st.session_state.EstudiantesActuales = Grupos[grupo]
-    
-    # Reiniciar asistencias para el nuevo grupo
-    st.session_state.Asistencias = {}
-    for estudiante in st.session_state.EstudiantesActuales:
-        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
-    
-    st.session_state.GrupoSeleccionado = grupo
-    st.rerun()
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Selector de grupo
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-st.title("Control de Asistencia - Quinto Año")
-
-col1, col2 = st.columns([1, 3])
-with col1:
-    st.write("**Seleccionar Grupo:**")
-with col2:
-    grupo = st.radio(
-        "Selecciona el grupo",
-        ["A", "B", "C"],
-        index=0 if st.session_state.GrupoSeleccionado == "A" else 1 if st.session_state.GrupoSeleccionado == "B" else 2,
-        horizontal=True,
-        key="SelectorGrupo"
-    )
-
-# Verificar si cambio el grupo
-if grupo != st.session_state.GrupoSeleccionado:
-    CambiarGrupo(grupo)
-
-st.write(f"**Grupo {st.session_state.GrupoSeleccionado} - {len(st.session_state.EstudiantesActuales)} estudiantes**")
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Fecha y hora
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+st.title("Control de Asistencia - Quinto Año A")
 
 now = datetime.now()
-FechaHora = now.strftime("%d/%m/%Y %H:%M:%S")
-st.write(f"**Fecha y Hora:** {FechaHora}")
-
-st.divider()
+fecha_hora = now.strftime("%d/%m/%Y %H:%M:%S")
+st.write(f"**Fecha y Hora:** {fecha_hora}")
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Registro de Asistencia
@@ -148,7 +56,7 @@ st.divider()
 
 st.subheader("Registro de Asistencia")
 
-for estudiante in st.session_state.EstudiantesActuales:
+for estudiante in estudiantes:
     num = estudiante["numero"]
     nombre = estudiante["nombre"]
     
@@ -159,52 +67,52 @@ for estudiante in st.session_state.EstudiantesActuales:
     with col2:
         st.write(nombre)
     with col3:
-        if st.button("Presente", key=f"Presente_{num}_{st.session_state.GrupoSeleccionado}"):
-            st.session_state.Asistencias[num] = "Presente"
+        if st.button("Presente", key=f"presente_{num}"):
+            st.session_state.asistencias[num] = "Presente"
             st.rerun()
     with col4:
-        if st.button("Tardanza", key=f"Tardanza_{num}_{st.session_state.GrupoSeleccionado}"):
-            st.session_state.Asistencias[num] = "Tardanza"
+        if st.button("Tardanza", key=f"tardanza_{num}"):
+            st.session_state.asistencias[num] = "Tardanza"
             st.rerun()
 
 st.divider()
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+#oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Resumen de Asistencia
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 st.subheader("Resumen de Asistencia")
 
-ContadorPresentes = 0
-ContadorTardanzas = 0
-ContadorAusentes = 0
+contador_presentes = 0
+contador_tardanzas = 0
+contador_ausentes = 0
 i = 0
 
-while i < len(st.session_state.EstudiantesActuales):
-    num = st.session_state.EstudiantesActuales[i]["numero"]
-    estado = st.session_state.Asistencias[num]
+while i < len(estudiantes):
+    num = estudiantes[i]["numero"]
+    estado = st.session_state.asistencias[num]
     
     if estado == "Presente":
-        ContadorPresentes += 1
+        contador_presentes += 1
     elif estado == "Tardanza":
-        ContadorTardanzas += 1
+        contador_tardanzas += 1
     else:
-        ContadorAusentes += 1
+        contador_ausentes += 1
     i += 1
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric("Presentes", ContadorPresentes)
+    st.metric("Presentes", contador_presentes)
 with col2:
-    st.metric("Tardanzas", ContadorTardanzas)
+    st.metric("Tardanzas", contador_tardanzas)
 with col3:
-    st.metric("Ausentes", ContadorAusentes)
+    st.metric("Ausentes", contador_ausentes)
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Boton para reiniciar
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 if st.button("Reiniciar Asistencia"):
-    for estudiante in st.session_state.EstudiantesActuales:
-        st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
+    for estudiante in estudiantes:
+        st.session_state.asistencias[estudiante["numero"]] = "Ausente"
     st.rerun()
