@@ -11,7 +11,7 @@ Aplicación web para registrar la asistencia de estudiantes de Quinto Año A.
 - Reinicio rápido de la lista
 
 ## 📱 Acceso
-🔗 [Enlace a la aplicación desplegada] (lo agregarás después)
+🔗 [Enlace a la aplicación desplegada] (lo aagregaré después)
 
 ## 🛠️ Tecnologías
 - Python
