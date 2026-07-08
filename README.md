@@ -13,12 +13,12 @@ Aplicación web para registrar la asistencia de estudiantes de Quinto Año A.
 ## 📱 Acceso
 🔗 [Enlace a la aplicación desplegada] (lo aagregaré después)
 
-## 🛠️ Tecnologías
+##  Tecnologías
 - Python
 - Streamlit
 - Pandas
 
-## 📦 Instalación local
+## Instalación local
 ```bash
 pip install -r requirements.txt
 streamlit run asistencia.py
