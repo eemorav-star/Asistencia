@@ -3,9 +3,12 @@
 # Semestral de Herramientas de Programacion 1
 # Integrantes: Jaen Kathya, Luna Adrian, Mora Elpidio
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 import streamlit as st
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 from datetime import datetime
 
 # --- Configuración de Google Sheets desde Secrets ---
@@ -16,13 +19,13 @@ def conectar_google_sheets():
 
     # Obtener las credenciales desde los secretos de Streamlit
     creds_dict = dict(st.secrets["gcp_service_account"])
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
 
     # Autorizar al cliente de gspread
     client = gspread.authorize(creds)
     return client
 
-# --- Configuración de grupos (se mantiene igual) ---
+# --- Configuración de grupos ---
 GRUPOS = {
     "A": {
         "fila_inicio": 8,
@@ -46,10 +49,9 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
         # 1. Conectar a Google Sheets
         client = conectar_google_sheets()
 
-        # 2. Abrir el libro y la hoja (debe coincidir con tu archivo en Drive)
-        # IMPORTANTE: El nombre debe ser "Libreta" (sin extensión .xlsx)
-        libro = client.open("Libreta")  # Nombre del archivo en Google Drive
-        hoja = libro.worksheet("ASISTENCIA")  # Nombre de la pestaña
+        # 2. Abrir el libro y la hoja
+        libro = client.open("Libreta")
+        hoja = libro.worksheet("ASISTENCIA")
 
         # 3. Obtener la configuración del grupo
         fila_inicio = GRUPOS[grupo]["fila_inicio"]
@@ -60,7 +62,6 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
         columna = None
         for c in range(3, 14):  # C=3, M=13
             columna_vacia = True
-            # Verificar si hay algún dato en esa columna para el rango de estudiantes
             rango_celdas = hoja.range(fila_inicio, c, fila_fin, c)
             for celda in rango_celdas:
                 if celda.value is not None and celda.value != "":
@@ -76,7 +77,7 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
         # 5. Escribir la fecha en el encabezado
         hoja.update_cell(fila_fecha, columna, datetime.now().strftime("%d/%m/%Y"))
 
-        # 6. Escribir las asistencias de los estudiantes
+        # 6. Escribir las asistencias
         fila = fila_inicio
         for estudiante in estudiantes:
             estado = asistencias[estudiante["numero"]]
@@ -89,7 +90,7 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
             hoja.update_cell(fila, columna, valor)
             fila += 1
 
-        st.success(" Asistencia guardada exitosamente en Google Sheets")
+        st.success("Asistencia guardada exitosamente en Google Sheets")
 
     except Exception as e:
         st.error(f"❌ Error al guardar: {e}")
