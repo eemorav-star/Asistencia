@@ -1,9 +1,22 @@
-from openpyxl import load_workbook
+import streamlit as st
+import gspread
+from google.oauth2.service_account import Credentials
 from datetime import datetime
 
-RUTA_EXCEL = "Libreta.xlsx"
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets"
+]
 
-HOJA = "ASISTENCIA"
+credenciales = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=SCOPES
+)
+
+cliente = gspread.authorize(credenciales)
+
+libro = cliente.open("Libreta")
+
+hoja = libro.worksheet("ASISTENCIA")
 
 GRUPOS = {
     "A": {
