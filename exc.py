@@ -1,7 +1,7 @@
 from openpyxl import load_workbook
 from datetime import datetime
 
-RUTA_EXCEL = r"https://1drv.ms/x/c/43b66bd1a6676d6d/IQAghMFhKgaJSqG0BPGWx7N1AQKAaYTzBkbAqmZmgVb06Uk?e=pjwRCH"
+RUTA_EXCEL = r"C:\Users\USER\OneDrive - Universidad Tecnológica de Panamá\Semestral herramientas de prog 1\Libreta.xlsx"
 
 HOJA = "ASISTENCIA"
 
