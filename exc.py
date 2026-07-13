@@ -3,7 +3,6 @@ from datetime import datetime
 
 RUTA_EXCEL = r"https://utpac-my.sharepoint.com/:x:/g/personal/elpidio_mora_utp_ac_pa/IQBnfMqG_ePTRYQoRQz3aJlDAUYqLCipmKRbBOkI2Lrz_KM?e=o3GDse"
 
-C:\Users\USER\OneDrive - Universidad Tecnológica de Panamá\Semestral herramientas de prog 1\Libreta.xlsx
 HOJA = "ASISTENCIA"
 
 GRUPOS = {
