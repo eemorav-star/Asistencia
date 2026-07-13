@@ -3,158 +3,94 @@
 # Semestral de Herramientas de Programacion 1
 # Integrantes: Jaen Kathya, Luna Adrian, Mora Elpidio
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-from datetime import datetime
-
 import streamlit as st
 import gspread
-from google.oauth2.service_account import Credentials
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CONEXION A GOOGLE SHEETS
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# --- Configuración de Google Sheets desde Secrets ---
+def conectar_google_sheets():
+    # Definir el alcance de la API
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive']
 
-Scopes = [
-    "https://www.googleapis.com/auth/spreadsheets"
-]
+    # Obtener las credenciales desde los secretos de Streamlit
+    creds_dict = dict(st.secrets["gcp_service_account"])
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 
-Credenciales = Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
-    scopes=Scopes
-)
+    # Autorizar al cliente de gspread
+    client = gspread.authorize(creds)
+    return client
 
-Cliente = gspread.authorize(Credenciales)
-
-Libro = Cliente.open_by_key(
-    "1L2akLixY8JG078yBpCDxezzVMsQo1XK7mzUlrwdM6Cs"
-)
-
-Hoja = Libro.worksheet("ASISTENCIA")
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CONFIGURACION DE LOS GRUPOS
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
+# --- Configuración de grupos (se mantiene igual) ---
 GRUPOS = {
-
     "A": {
-
         "fila_inicio": 8,
         "fila_fin": 22,
         "fila_fecha": 7
-
     },
-
     "B": {
-
         "fila_inicio": 46,
         "fila_fin": 60,
         "fila_fecha": 45
-
     },
-
     "C": {
-
         "fila_inicio": 86,
         "fila_fin": 101,
         "fila_fecha": 85
-
     }
-
 }
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# FUNCION PARA GUARDAR LA ASISTENCIA
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+def GuardarAsistencia(grupo, estudiantes, asistencias):
+    try:
+        # 1. Conectar a Google Sheets
+        client = conectar_google_sheets()
 
-def GuardarAsistencia(Grupo, Estudiantes, Asistencias):
+        # 2. Abrir el libro y la hoja (debe coincidir con tu archivo en Drive)
+        # IMPORTANTE: El nombre debe ser "Libreta" (sin extensión .xlsx)
+        libro = client.open("Libreta")  # Nombre del archivo en Google Drive
+        hoja = libro.worksheet("ASISTENCIA")  # Nombre de la pestaña
 
-    FilaInicio = GRUPOS[Grupo]["fila_inicio"]
-    FilaFin = GRUPOS[Grupo]["fila_fin"]
-    FilaFecha = GRUPOS[Grupo]["fila_fecha"]
+        # 3. Obtener la configuración del grupo
+        fila_inicio = GRUPOS[grupo]["fila_inicio"]
+        fila_fin = GRUPOS[grupo]["fila_fin"]
+        fila_fecha = GRUPOS[grupo]["fila_fecha"]
 
-    Columna = None
-
-    # Buscar la primera columna vacia entre C y M
-
-    for C in range(3, 14):
-
-        Vacia = True
-
-        for Fila in range(FilaInicio, FilaFin + 1):
-
-            Valor = Hoja.cell(Fila, C).value
-
-            if Valor is not None and str(Valor).strip() != "":
-
-                Vacia = False
+        # 4. Buscar la primera columna vacía entre C y M
+        columna = None
+        for c in range(3, 14):  # C=3, M=13
+            columna_vacia = True
+            # Verificar si hay algún dato en esa columna para el rango de estudiantes
+            rango_celdas = hoja.range(fila_inicio, c, fila_fin, c)
+            for celda in rango_celdas:
+                if celda.value is not None and celda.value != "":
+                    columna_vacia = False
+                    break
+            if columna_vacia:
+                columna = c
                 break
 
-        if Vacia:
+        if columna is None:
+            raise Exception("Ya no quedan columnas disponibles (C hasta M).")
 
-            Columna = C
-            break
+        # 5. Escribir la fecha en el encabezado
+        hoja.update_cell(fila_fecha, columna, datetime.now().strftime("%d/%m/%Y"))
 
-    if Columna is None:
+        # 6. Escribir las asistencias de los estudiantes
+        fila = fila_inicio
+        for estudiante in estudiantes:
+            estado = asistencias[estudiante["numero"]]
+            if estado == "Presente":
+                valor = "."
+            elif estado == "Tardanza":
+                valor = "T"
+            else:
+                valor = "---"
+            hoja.update_cell(fila, columna, valor)
+            fila += 1
 
-        raise Exception(
-            "Ya no quedan columnas disponibles (C hasta M)."
-        )
+        st.success(" Asistencia guardada exitosamente en Google Sheets")
 
-    # Guardar fecha
-
-    Hoja.update_cell(
-
-        FilaFecha,
-
-        Columna,
-
-        datetime.now().strftime("%d/%m/%Y")
-
-    )
-
-    # Guardar asistencia
-
-    Fila = FilaInicio
-
-    for Estudiante in Estudiantes:
-
-        Estado = Asistencias[Estudiante["numero"]]
-
-        if Estado == "Presente":
-
-            Hoja.update_cell(
-
-                Fila,
-
-                Columna,
-
-                "."
-
-            )
-
-        elif Estado == "Tardanza":
-
-            Hoja.update_cell(
-
-                Fila,
-
-                Columna,
-
-                "T"
-
-            )
-
-        else:
-
-            Hoja.update_cell(
-
-                Fila,
-
-                Columna,
-
-                "---"
-
-            )
-
-        Fila += 1
+    except Exception as e:
+        st.error(f"❌ Error al guardar: {e}")
+        raise
