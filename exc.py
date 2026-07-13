@@ -1,97 +1,160 @@
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Universidad Tecnologica de Panama
+# Semestral de Herramientas de Programacion 1
+# Integrantes: Jaen Kathya, Luna Adrian, Mora Elpidio
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+from datetime import datetime
+
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import datetime
 
-SCOPES = [
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# CONEXION A GOOGLE SHEETS
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+Scopes = [
     "https://www.googleapis.com/auth/spreadsheets"
 ]
 
-credenciales = Credentials.from_service_account_info(
+Credenciales = Credentials.from_service_account_info(
     st.secrets["gcp_service_account"],
-    scopes=SCOPES
+    scopes=Scopes
 )
 
-cliente = gspread.authorize(credenciales)
+Cliente = gspread.authorize(Credenciales)
 
-libro = cliente.open("Libreta")
+Libro = Cliente.open_by_key(
+    "1L2akLixY8JG078yBpCDxezzVMsQo1XK7mzUlrwdM6Cs"
+)
 
-hoja = libro.worksheet("ASISTENCIA")
+Hoja = Libro.worksheet("ASISTENCIA")
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# CONFIGURACION DE LOS GRUPOS
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 GRUPOS = {
+
     "A": {
+
         "fila_inicio": 8,
         "fila_fin": 22,
         "fila_fecha": 7
+
     },
+
     "B": {
+
         "fila_inicio": 46,
         "fila_fin": 60,
         "fila_fecha": 45
+
     },
+
     "C": {
+
         "fila_inicio": 86,
         "fila_fin": 101,
         "fila_fecha": 85
+
     }
+
 }
 
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# FUNCION PARA GUARDAR LA ASISTENCIA
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-def GuardarAsistencia(grupo, estudiantes, asistencias):
+def GuardarAsistencia(Grupo, Estudiantes, Asistencias):
 
-    libro = load_workbook(RUTA_EXCEL)
-    hoja = libro[HOJA]
+    FilaInicio = GRUPOS[Grupo]["fila_inicio"]
+    FilaFin = GRUPOS[Grupo]["fila_fin"]
+    FilaFecha = GRUPOS[Grupo]["fila_fecha"]
 
-    fila_inicio = GRUPOS[grupo]["fila_inicio"]
-    fila_fecha = GRUPOS[grupo]["fila_fecha"]
+    Columna = None
 
-    # Buscar la primera columna vacía entre C y M
-    columna = None
+    # Buscar la primera columna vacia entre C y M
 
-    for c in range(3, 14):      # C=3 hasta M=13
+    for C in range(3, 14):
 
-        vacia = True
+        Vacia = True
 
-        for fila in range(
-            GRUPOS[grupo]["fila_inicio"],
-            GRUPOS[grupo]["fila_fin"] + 1
-        ):
+        for Fila in range(FilaInicio, FilaFin + 1):
 
-            if hoja.cell(row=fila, column=c).value is not None:
+            Valor = Hoja.cell(Fila, C).value
 
-                vacia = False
+            if Valor is not None and str(Valor).strip() != "":
+
+                Vacia = False
                 break
 
-        if vacia:
+        if Vacia:
 
-            columna = c
+            Columna = C
             break
 
-    if columna is None:
-        raise Exception("Ya no quedan columnas disponibles (C hasta M).")
+    if Columna is None:
 
-    # Escribir la fecha en el encabezado
-    hoja.cell(
-        row=fila_fecha,
-        column=columna
-    ).value = datetime.now().strftime("%d/%m/%Y")
+        raise Exception(
+            "Ya no quedan columnas disponibles (C hasta M)."
+        )
 
-    # Guardar las asistencias
-    fila = fila_inicio
+    # Guardar fecha
 
-    for estudiante in estudiantes:
+    Hoja.update_cell(
 
-        estado = asistencias[estudiante["numero"]]
+        FilaFecha,
 
-        if estado == "Presente":
-            hoja.cell(row=fila, column=columna).value = "."
+        Columna,
 
-        elif estado == "Tardanza":
-            hoja.cell(row=fila, column=columna).value = "T"
+        datetime.now().strftime("%d/%m/%Y")
+
+    )
+
+    # Guardar asistencia
+
+    Fila = FilaInicio
+
+    for Estudiante in Estudiantes:
+
+        Estado = Asistencias[Estudiante["numero"]]
+
+        if Estado == "Presente":
+
+            Hoja.update_cell(
+
+                Fila,
+
+                Columna,
+
+                "."
+
+            )
+
+        elif Estado == "Tardanza":
+
+            Hoja.update_cell(
+
+                Fila,
+
+                Columna,
+
+                "T"
+
+            )
 
         else:
-            hoja.cell(row=fila, column=columna).value = "---"
 
-        fila += 1
+            Hoja.update_cell(
 
-    libro.save(RUTA_EXCEL)
+                Fila,
+
+                Columna,
+
+                "---"
+
+            )
+
+        Fila += 1
