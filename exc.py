@@ -3,27 +3,40 @@
 # Semestral de Herramientas de Programacion 1
 # Integrantes: Jaen Kathya, Luna Adrian, Mora Elpidio
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
+import traceback
 
-# --- Configuración de Google Sheets desde Secrets ---
+# --- Configuración de Google Sheets ---
 def conectar_google_sheets():
-    # Definir el alcance de la API
-    scope = ['https://spreadsheets.google.com/feeds',
-             'https://www.googleapis.com/auth/drive']
-
-    # Obtener las credenciales desde los secretos de Streamlit
-    creds_dict = dict(st.secrets["gcp_service_account"])
-    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-
-    # Autorizar al cliente de gspread
-    client = gspread.authorize(creds)
-    return client
+    try:
+        # Definir alcance de la API
+        scope = [
+            'https://spreadsheets.google.com/feeds',
+            'https://www.googleapis.com/auth/drive'
+        ]
+        
+        # Verificar que los secrets existen
+        if "gcp_service_account" not in st.secrets:
+            raise Exception(" No se encontró 'gcp_service_account' en Secrets de Streamlit")
+        
+        # Obtener credenciales
+        creds_dict = dict(st.secrets["gcp_service_account"])
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+        
+        # Conectar a Google Sheets
+        client = gspread.authorize(creds)
+        return client
+        
+    except Exception as e:
+        st.error(f" Error de conexión: {str(e)}")
+        st.error("Revisa que:")
+        st.error("1. Los secrets estén configurados en Streamlit Cloud")
+        st.error("2. El formato TOML sea correcto")
+        st.error("3. La cuenta de servicio tenga permisos")
+        raise
 
 # --- Configuración de grupos ---
 GRUPOS = {
@@ -44,23 +57,24 @@ GRUPOS = {
     }
 }
 
+# --- Función principal ---
 def GuardarAsistencia(grupo, estudiantes, asistencias):
     try:
         # 1. Conectar a Google Sheets
         client = conectar_google_sheets()
-
+        
         # 2. Abrir el libro y la hoja
-        libro = client.open("Libreta")
-        hoja = libro.worksheet("ASISTENCIA")
-
-        # 3. Obtener la configuración del grupo
+        libro = client.open("Libreta")  # Nombre del archivo en Google Drive
+        hoja = libro.worksheet("ASISTENCIA")  # Nombre de la pestaña
+        
+        # 3. Obtener configuración del grupo
         fila_inicio = GRUPOS[grupo]["fila_inicio"]
         fila_fin = GRUPOS[grupo]["fila_fin"]
         fila_fecha = GRUPOS[grupo]["fila_fecha"]
-
-        # 4. Buscar la primera columna vacía entre C y M
+        
+        # 4. Buscar primera columna vacía (C=3 hasta M=13)
         columna = None
-        for c in range(3, 14):  # C=3, M=13
+        for c in range(3, 14):
             columna_vacia = True
             rango_celdas = hoja.range(fila_inicio, c, fila_fin, c)
             for celda in rango_celdas:
@@ -70,14 +84,15 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
             if columna_vacia:
                 columna = c
                 break
-
+        
         if columna is None:
             raise Exception("Ya no quedan columnas disponibles (C hasta M).")
-
-        # 5. Escribir la fecha en el encabezado
-        hoja.update_cell(fila_fecha, columna, datetime.now().strftime("%d/%m/%Y"))
-
-        # 6. Escribir las asistencias
+        
+        # 5. Escribir fecha
+        fecha_actual = datetime.now().strftime("%d/%m/%Y")
+        hoja.update_cell(fila_fecha, columna, fecha_actual)
+        
+        # 6. Escribir asistencias
         fila = fila_inicio
         for estudiante in estudiantes:
             estado = asistencias[estudiante["numero"]]
@@ -89,9 +104,11 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
                 valor = "---"
             hoja.update_cell(fila, columna, valor)
             fila += 1
-
-        st.success("Asistencia guardada exitosamente en Google Sheets")
-
+        
+        st.success(f"Asistencia guardada en Google Sheets (Columna {chr(64 + columna)})")
+        return True
+        
     except Exception as e:
-        st.error(f"❌ Error al guardar: {e}")
-        raise
+        st.error(f" Error al guardar: {str(e)}")
+        st.error(f"Detalles: {traceback.format_exc()}")
+        return False
