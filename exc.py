@@ -7,67 +7,43 @@ import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
-import traceback
 
 # --- Configuración de Google Sheets ---
 def conectar_google_sheets():
-    try:
-        # Definir alcance de la API
-        scope = [
-            'https://spreadsheets.google.com/feeds',
-            'https://www.googleapis.com/auth/drive'
-        ]
-        
-        # Verificar que los secrets existen
-        if "gcp_service_account" not in st.secrets:
-            raise Exception(" No se encontró 'gcp_service_account' en Secrets de Streamlit")
-        
-        # Obtener credenciales
-        creds_dict = dict(st.secrets["gcp_service_account"])
-        creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-        
-        # Conectar a Google Sheets
-        client = gspread.authorize(creds)
-        return client
-        
-    except Exception as e:
-        st.error(f" Error de conexión: {str(e)}")
-        st.error("Revisa que:")
-        st.error("1. Los secrets estén configurados en Streamlit Cloud")
-        st.error("2. El formato TOML sea correcto")
-        st.error("3. La cuenta de servicio tenga permisos")
-        raise
+    scope = [
+        'https://spreadsheets.google.com/feeds',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    
+    # Verificar que los secrets existen
+    if "gcp_service_account" not in st.secrets:
+        raise Exception(" No se encontró 'gcp_service_account' en Secrets")
+    
+    # Obtener credenciales
+    creds_dict = dict(st.secrets["gcp_service_account"])
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+    
+    # Conectar
+    client = gspread.authorize(creds)
+    return client
 
 # --- Configuración de grupos ---
 GRUPOS = {
-    "A": {
-        "fila_inicio": 8,
-        "fila_fin": 22,
-        "fila_fecha": 7
-    },
-    "B": {
-        "fila_inicio": 46,
-        "fila_fin": 60,
-        "fila_fecha": 45
-    },
-    "C": {
-        "fila_inicio": 86,
-        "fila_fin": 101,
-        "fila_fecha": 85
-    }
+    "A": {"fila_inicio": 8, "fila_fin": 22, "fila_fecha": 7},
+    "B": {"fila_inicio": 46, "fila_fin": 60, "fila_fecha": 45},
+    "C": {"fila_inicio": 86, "fila_fin": 101, "fila_fecha": 85}
 }
 
-# --- Función principal ---
 def GuardarAsistencia(grupo, estudiantes, asistencias):
     try:
         # 1. Conectar a Google Sheets
         client = conectar_google_sheets()
         
         # 2. Abrir el libro y la hoja
-        libro = client.open("Libreta")  # Nombre del archivo en Google Drive
-        hoja = libro.worksheet("ASISTENCIA")  # Nombre de la pestaña
+        libro = client.open("Libreta")
+        hoja = libro.worksheet("ASISTENCIA")
         
-        # 3. Obtener configuración del grupo
+        # 3. Configuración del grupo
         fila_inicio = GRUPOS[grupo]["fila_inicio"]
         fila_fin = GRUPOS[grupo]["fila_fin"]
         fila_fecha = GRUPOS[grupo]["fila_fecha"]
@@ -89,8 +65,7 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
             raise Exception("Ya no quedan columnas disponibles (C hasta M).")
         
         # 5. Escribir fecha
-        fecha_actual = datetime.now().strftime("%d/%m/%Y")
-        hoja.update_cell(fila_fecha, columna, fecha_actual)
+        hoja.update_cell(fila_fecha, columna, datetime.now().strftime("%d/%m/%Y"))
         
         # 6. Escribir asistencias
         fila = fila_inicio
@@ -105,10 +80,9 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
             hoja.update_cell(fila, columna, valor)
             fila += 1
         
-        st.success(f"Asistencia guardada en Google Sheets (Columna {chr(64 + columna)})")
+        st.success(f" Asistencia guardada en Google Sheets (Columna {chr(64 + columna)})")
         return True
         
     except Exception as e:
-        st.error(f" Error al guardar: {str(e)}")
-        st.error(f"Detalles: {traceback.format_exc()}")
+        st.error(f"❌ Error al guardar: {str(e)}")
         return False
