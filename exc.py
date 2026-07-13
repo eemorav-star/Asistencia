@@ -1,6 +1,6 @@
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Universidad Tecnologica de Panama
-# Semestral de Herramientas de Programacion 1
+# Universidad Tecnológica de Panamá
+# Semestral de Herramientas de Programación 1
 # Integrantes: Jaen Kathya, Luna Adrian, Mora Elpidio
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 import streamlit as st
@@ -11,10 +11,8 @@ from datetime import datetime
 #  Configuración de Google Sheets 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 def conectar_google_sheets():
-    scope = [
-        'https://spreadsheets.google.com/feeds',
-        'https://www.googleapis.com/auth/drive'
-    ]
+    scope = ['https://spreadsheets.google.com/feeds',
+        'https://www.googleapis.com/auth/drive']
     
     # Verificar que los secrets existen
     if "gcp_service_account" not in st.secrets:
@@ -28,7 +26,7 @@ def conectar_google_sheets():
     client = gspread.authorize(creds)
     return client
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-#  Configuración de grupos 
+#  Configuración de los grupos 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 GRUPOS = {
     "A": {"fila_inicio": 8, "fila_fin": 22, "fila_fecha": 7},
@@ -85,5 +83,5 @@ def GuardarAsistencia(grupo, estudiantes, asistencias):
         return True
         
     except Exception as e:
-        st.error(f"❌ Error al guardar: {str(e)}")
+        st.error(f"Error al guardar: {str(e)}")
         return False
