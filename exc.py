@@ -7,8 +7,9 @@ import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
-
-# --- Configuración de Google Sheets ---
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+#  Configuración de Google Sheets 
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 def conectar_google_sheets():
     scope = [
         'https://spreadsheets.google.com/feeds',
@@ -26,13 +27,13 @@ def conectar_google_sheets():
     # Conectar
     client = gspread.authorize(creds)
     return client
-
-# --- Configuración de grupos ---
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+#  Configuración de grupos 
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 GRUPOS = {
     "A": {"fila_inicio": 8, "fila_fin": 22, "fila_fecha": 7},
     "B": {"fila_inicio": 46, "fila_fin": 60, "fila_fecha": 45},
-    "C": {"fila_inicio": 86, "fila_fin": 101, "fila_fecha": 85}
-}
+    "C": {"fila_inicio": 86, "fila_fin": 101, "fila_fecha": 85}}
 
 def GuardarAsistencia(grupo, estudiantes, asistencias):
     try:
