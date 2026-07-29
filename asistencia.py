@@ -38,7 +38,7 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CSS para estilos profesionales
+# CSS para estilos profesionales y colores del círculo
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def aplicar_estilos():
@@ -52,14 +52,15 @@ def aplicar_estilos():
             flex-wrap: wrap;
         }
         
-        /* Ocultar el label del radio */
+        /* Ocultar el label principal del grupo de radio buttons */
         .stRadio label {
             display: none !important;
         }
         
-        /* Estilo para los radio buttons */
+        /* Estilo general para los botones/etiquetas */
         .stRadio > div > label {
-            display: inline-block !important;
+            display: inline-flex !important;
+            align-items: center;
             padding: 6px 16px;
             border-radius: 8px;
             font-weight: 600;
@@ -80,31 +81,38 @@ def aplicar_estilos():
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
-        /* Estilo para boton seleccionado - Presente (AZUL) */
+        /* ========================================================
+           COLORES DE LOS CÍRCULOS (accent-color) Y FONDOS
+           ======================================================== */
+
+        /* PRESENTE -> Círculo Azul (#1F77B4) */
+        .stRadio > div > label:has(input[value="Presente"]) input[type="radio"] {
+            accent-color: #1F77B4 !important;
+        }
         .stRadio > div > label:has(input[value="Presente"]:checked) {
-            background-color: #1F77B4 !important;
-            color: white !important;
             border-color: #1F77B4 !important;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(31, 119, 180, 0.3);
+            background-color: #e8f4f8 !important;
+            color: #1F77B4 !important;
         }
-        
-        /* Estilo para boton seleccionado - Tardanza (VERDE) */
+
+        /* TARDANZA -> Círculo Verde (#22C55E) */
+        .stRadio > div > label:has(input[value="Tardanza"]) input[type="radio"] {
+            accent-color: #22C55E !important;
+        }
         .stRadio > div > label:has(input[value="Tardanza"]:checked) {
-            background-color: #22C55E !important;
-            color: white !important;
             border-color: #22C55E !important;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            background-color: #eefdf4 !important;
+            color: #15803d !important;
         }
-        
-        /* Estilo para boton seleccionado - Ausente (ROJO) */
+
+        /* AUSENTE -> Círculo Rojo (#DC3545) */
+        .stRadio > div > label:has(input[value="Ausente"]) input[type="radio"] {
+            accent-color: #dc3545 !important;
+        }
         .stRadio > div > label:has(input[value="Ausente"]:checked) {
-            background-color: #dc3545 !important;
-            color: white !important;
             border-color: #dc3545 !important;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            background-color: #fde8e8 !important;
+            color: #dc3545 !important;
         }
         
         /* Mejorar la tabla de vista previa */
@@ -113,7 +121,7 @@ def aplicar_estilos():
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
-        /* Mejorar metricas */
+        /* Mejorar métricas */
         div[data-testid="metric-container"] {
             background-color: #f8f9fa;
             padding: 16px;
@@ -152,12 +160,13 @@ def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
 # Interfaz Principal
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
+# Aplicar estilos CSS personalizados
 aplicar_estilos()
 
 st.title("Control de Asistencia - Quinto Año")
 
 # Selector de grupo
-col1, col2 = st.columns([1,3])
+col1, col2 = st.columns([1, 3])
 
 with col1:
     st.write("**Grupo:**")
@@ -165,9 +174,9 @@ with col1:
 with col2:
     grupo = st.radio(
         "Seleccionar Grupo",
-        ["A","B","C"],
-        index=0 if st.session_state.GrupoSeleccionado=="A"
-        else 1 if st.session_state.GrupoSeleccionado=="B"
+        ["A", "B", "C"],
+        index=0 if st.session_state.GrupoSeleccionado == "A"
+        else 1 if st.session_state.GrupoSeleccionado == "B"
         else 2,
         horizontal=True,
         label_visibility="collapsed"
