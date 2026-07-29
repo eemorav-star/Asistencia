@@ -31,7 +31,9 @@ def conectar_google_sheets():
 GRUPOS = {
     "A": {"fila_inicio": 8, "fila_fin": 22, "fila_fecha": 7},
     "B": {"fila_inicio": 46, "fila_fin": 60, "fila_fecha": 45},
-    "C": {"fila_inicio": 86, "fila_fin": 101, "fila_fecha": 85}}
+    "C": {"fila_inicio": 86, "fila_fin": 101, "fila_fecha": 85},
+    "D": {"fila_inicio": 127, "fila_fin": 141, "fila_fecha": 126},
+    "E": {"fila_inicio": 166, "fila_fin": 180, "fila_fecha": 165}}
 
 def GuardarAsistencia(grupo, estudiantes, asistencias):
     try:
