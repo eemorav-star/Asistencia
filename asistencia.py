@@ -47,6 +47,45 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Funcion para aplicar estilos a los botones
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+def boton_con_estilo(texto, key, color_activo, color_inactivo, estado_actual, estado_deseado):
+    """
+    Crea un botón con estilo que cambia de color según el estado
+    """
+    # Determinar si el botón debe estar activo
+    es_activo = (estado_actual == estado_deseado)
+    
+    # Seleccionar el color según el estado
+    color_fondo = color_activo if es_activo else color_inactivo
+    
+    # CSS para el botón
+    estilo = f"""
+    <style>
+    div.stButton > button[data-testid="baseButton-secondary"] {{
+        background-color: {color_fondo} !important;
+        color: {'black' if es_activo else 'white'} !important;
+        border: 2px solid {color_fondo} !important;
+        transition: all 0.3s ease !important;
+        font-weight: bold !important;
+    }}
+    div.stButton > button[data-testid="baseButton-secondary"]:hover {{
+        transform: scale(1.05) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        background-color: {color_activo} !important;
+        color: {'black' if estado_deseado == "Presente" else 'white'} !important;
+    }}
+    </style>
+    """
+    
+    # Aplicar el estilo
+    st.markdown(estilo, unsafe_allow_html=True)
+    
+    # Crear el botón
+    return st.button(texto, key=key)
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Interfaz
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
@@ -108,20 +147,58 @@ for estudiante in st.session_state.EstudiantesActuales:
         st.write(nombre)
 
     with col3:
-
-        if st.button("Presente",key=f"P_{numero}_{grupo}"):
-
-            st.session_state.Asistencias[numero]="Presente"
-
+        # Obtener el estado actual del estudiante
+        estado_actual = st.session_state.Asistencias[numero]
+        
+        # Botón Presente con estilo verde lima (#A4DE02)
+        if st.button("Presente", key=f"P_{numero}_{grupo}"):
+            st.session_state.Asistencias[numero] = "Presente"
             st.rerun()
+        
+        # Aplicar estilo al botón Presente
+        if estado_actual == "Presente":
+            st.markdown(
+                f"""
+                <style>
+                div[data-testid="column"]:nth-child(3) button {{
+                    background-color: #A4DE02 !important;
+                    color: black !important;
+                    border: 2px solid #A4DE02 !important;
+                    font-weight: bold !important;
+                    transform: scale(1.05) !important;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+                }}
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
 
     with col4:
-
-        if st.button("Tardanza",key=f"T_{numero}_{grupo}"):
-
-            st.session_state.Asistencias[numero]="Tardanza"
-
+        # Obtener el estado actual del estudiante
+        estado_actual = st.session_state.Asistencias[numero]
+        
+        # Botón Tardanza con estilo azul eléctrico (#008CFF)
+        if st.button("Tardanza", key=f"T_{numero}_{grupo}"):
+            st.session_state.Asistencias[numero] = "Tardanza"
             st.rerun()
+        
+        # Aplicar estilo al botón Tardanza
+        if estado_actual == "Tardanza":
+            st.markdown(
+                f"""
+                <style>
+                div[data-testid="column"]:nth-child(4) button {{
+                    background-color: #008CFF !important;
+                    color: white !important;
+                    border: 2px solid #008CFF !important;
+                    font-weight: bold !important;
+                    transform: scale(1.05) !important;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+                }}
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
 
 st.divider()
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
