@@ -26,6 +26,25 @@ if "Asistencias" not in st.session_state:
         st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Procesar acciones de los botones via query params
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+query_params = st.query_params
+accion = query_params.get("accion", None)
+estudiante_id = query_params.get("estudiante", None)
+grupo_param = query_params.get("grupo", None)
+
+if accion and estudiante_id and grupo_param:
+    if accion == "presente":
+        st.session_state.Asistencias[estudiante_id] = "Presente"
+    elif accion == "tardanza":
+        st.session_state.Asistencias[estudiante_id] = "Tardanza"
+    elif accion == "ausente":
+        st.session_state.Asistencias[estudiante_id] = "Ausente"
+    st.query_params.clear()
+    st.rerun()
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Funcion para cambiar de grupo
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
@@ -38,89 +57,85 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CSS para estilos profesionales
+# Funcion para crear botones con estilo
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+def crear_boton_asistencia(texto, estudiante_id, grupo, estado_actual, tipo):
+    """
+    Crea un boton HTML con estilo dinamico
+    tipo: 'presente', 'tardanza', o 'ausente'
+    """
+    # Configurar colores segun tipo
+    if tipo == "presente":
+        color_activo = "#1F77B4"  # Azul
+        es_activo = (estado_actual == "Presente")
+        accion = "presente"
+    elif tipo == "tardanza":
+        color_activo = "#22C55E"  # Verde
+        es_activo = (estado_actual == "Tardanza")
+        accion = "tardanza"
+    else:  # ausente
+        color_activo = "#dc3545"  # Rojo
+        es_activo = (estado_actual == "Ausente")
+        accion = "ausente"
+    
+    # Determinar colores segun estado
+    if es_activo:
+        bg_color = color_activo
+        text_color = "white"
+        border_color = color_activo
+        transform = "scale(1.05)"
+        shadow = "0 4px 12px rgba(0,0,0,0.2)"
+        font_weight = "700"
+    else:
+        bg_color = "#f3f4f6"
+        text_color = "#6b7280"
+        border_color = "#d1d5db"
+        transform = "scale(1)"
+        shadow = "none"
+        font_weight = "500"
+    
+    html = f'''
+    <button 
+        onclick="window.location.href='?accion={accion}&estudiante={estudiante_id}&grupo={grupo}'" 
+        style="
+            background-color: {bg_color};
+            color: {text_color};
+            border: 2px solid {border_color};
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-weight: {font_weight};
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: {transform};
+            box-shadow: {shadow};
+            font-family: 'Source Sans Pro', sans-serif;
+            margin: 2px 4px;
+            min-width: 80px;
+            letter-spacing: 0.3px;
+        "
+        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'"
+        onmouseout="this.style.transform='{transform}';this.style.boxShadow='{shadow}'"
+    >
+        {texto}
+    </button>
+    '''
+    return html
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# CSS para estilos adicionales
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def aplicar_estilos():
     st.markdown("""
     <style>
-        /* Estilo para el contenedor de radio buttons */
-        .stRadio > div {
+        /* Estilo para el contenedor de botones */
+        div[data-testid="column"]:nth-child(3) {
             display: flex;
-            flex-direction: row;
-            gap: 10px;
             flex-wrap: wrap;
             align-items: center;
-        }
-        
-        /* Ocultar el label del radio */
-        .stRadio label {
-            display: none !important;
-        }
-        
-        /* Estilo para los radio buttons - formato etiqueta */
-        .stRadio > div > label {
-            display: inline-block !important;
-            padding: 4px 16px;
-            border-radius: 15px;
-            font-weight: 500;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #d1d5db;
-            background-color: #f3f4f6;
-            color: #6b7280;
-            margin: 2px;
-            min-width: 80px;
-            text-align: center;
-            font-family: 'Source Sans Pro', sans-serif;
-            letter-spacing: 0.3px;
-        }
-        
-        /* Efecto hover */
-        .stRadio > div > label:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border-color: #9ca3af;
-        }
-        
-        /* Estilo para boton seleccionado - Presente (Azul) */
-        .stRadio > div > label:has(input[value="Presente"]:checked) {
-            background-color: #1F77B4 !important;
-            color: white !important;
-            border-color: #1F77B4 !important;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(31, 119, 180, 0.3);
-        }
-        
-        /* Estilo para boton seleccionado - Tardanza (Verde) */
-        .stRadio > div > label:has(input[value="Tardanza"]:checked) {
-            background-color: #22C55E !important;
-            color: white !important;
-            border-color: #22C55E !important;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        }
-        
-        /* Estilo para boton seleccionado - Ausente (Rojo) */
-        .stRadio > div > label:has(input[value="Ausente"]:checked) {
-            background-color: #dc3545 !important;
-            color: white !important;
-            border-color: #dc3545 !important;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-        }
-        
-        /* Mejorar el contenedor de cada estudiante */
-        div[data-testid="column"] {
-            display: flex;
-            align-items: center;
-        }
-        
-        /* Estilo para el nombre del estudiante */
-        .estudiante-nombre {
-            font-weight: 500;
-            color: #1f2937;
+            gap: 4px;
         }
         
         /* Mejorar la tabla de vista previa */
@@ -143,36 +158,18 @@ def aplicar_estilos():
             border: none;
             border-top: 1px solid #e5e7eb;
         }
+        
+        /* Estilo para el nombre del estudiante */
+        .estudiante-numero {
+            font-weight: 600;
+            color: #374151;
+        }
+        .estudiante-nombre {
+            font-weight: 500;
+            color: #1f2937;
+        }
     </style>
     """, unsafe_allow_html=True)
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Funcion para crear radio buttons personalizados
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
-    """
-    Crea un selector de asistencia usando radio buttons con estilo personalizado
-    """
-    # Opciones de asistencia
-    opciones = ["Presente", "Tardanza", "Ausente"]
-    
-    # Crear radio button horizontal
-    seleccion = st.radio(
-        label=f"Asistencia_{estudiante_id}",
-        options=opciones,
-        index=opciones.index(estado_actual) if estado_actual in opciones else 2,
-        key=f"radio_{estudiante_id}_{grupo}",
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-    
-    # Actualizar el estado si cambia
-    if seleccion != estado_actual:
-        st.session_state.Asistencias[estudiante_id] = seleccion
-        st.rerun()
-    
-    return seleccion
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Interfaz Principal
@@ -222,21 +219,34 @@ for idx, estudiante in enumerate(st.session_state.EstudiantesActuales):
     nombre = estudiante["nombre"]
     estado_actual = st.session_state.Asistencias[numero]
     
-    # Crear un contenedor para cada estudiante con formato tipo lista
     with st.container():
         col1, col2, col3 = st.columns([0.5, 2.5, 7])
         
         with col1:
-            st.write(f"**{numero}.**")
+            st.markdown(f'<span class="estudiante-numero">{numero}.</span>', unsafe_allow_html=True)
         
         with col2:
-            st.write(f"**{nombre}**")
+            st.markdown(f'<span class="estudiante-nombre">{nombre}</span>', unsafe_allow_html=True)
         
         with col3:
-            # Selector de asistencia con radio buttons
-            crear_selector_asistencia(numero, estado_actual, st.session_state.GrupoSeleccionado)
+            # Crear los tres botones
+            html_presente = crear_boton_asistencia(
+                "Presente", numero, st.session_state.GrupoSeleccionado, 
+                estado_actual, "presente"
+            )
+            html_tardanza = crear_boton_asistencia(
+                "Tardanza", numero, st.session_state.GrupoSeleccionado, 
+                estado_actual, "tardanza"
+            )
+            html_ausente = crear_boton_asistencia(
+                "Ausente", numero, st.session_state.GrupoSeleccionado, 
+                estado_actual, "ausente"
+            )
+            
+            # Mostrar los botones
+            st.markdown(html_presente + html_tardanza + html_ausente, unsafe_allow_html=True)
         
-        # Linea separadora sutil (excepto después del ultimo)
+        # Linea separadora
         if idx < len(st.session_state.EstudiantesActuales) - 1:
             st.markdown("---")
 
@@ -262,7 +272,7 @@ for estudiante in st.session_state.EstudiantesActuales:
     else:
         ContadorAusentes += 1
 
-# Mostrar metricas con colores
+# Mostrar metricas con tarjetas de colores
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -275,7 +285,7 @@ with col1:
         color: white;
         box-shadow: 0 2px 8px rgba(31, 119, 180, 0.2);
     ">
-        <div style="font-size: 14px; opacity: 0.9;">Presentes</div>
+        <div style="font-size: 13px; opacity: 0.9;">Presentes</div>
         <div style="font-size: 28px; font-weight: bold;">{ContadorPresentes}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -290,7 +300,7 @@ with col2:
         color: white;
         box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
     ">
-        <div style="font-size: 14px; opacity: 0.9;">Tardanzas</div>
+        <div style="font-size: 13px; opacity: 0.9;">Tardanzas</div>
         <div style="font-size: 28px; font-weight: bold;">{ContadorTardanzas}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -305,7 +315,7 @@ with col3:
         color: white;
         box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
     ">
-        <div style="font-size: 14px; opacity: 0.9;">Ausentes</div>
+        <div style="font-size: 13px; opacity: 0.9;">Ausentes</div>
         <div style="font-size: 28px; font-weight: bold;">{ContadorAusentes}</div>
     </div>
     """, unsafe_allow_html=True)
