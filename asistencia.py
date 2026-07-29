@@ -107,15 +107,6 @@ def aplicar_estilos():
             box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
         
-        /* Estilo para boton seleccionado - Justificado */
-        .stRadio > div > label:has(input[value="Justificado"]:checked) {
-            background-color: #ff8c00 !important;
-            color: white !important;
-            border-color: #ff8c00 !important;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
-        }
-        
         /* Mejorar la tabla de vista previa */
         .stDataFrame {
             border-radius: 8px;
@@ -140,8 +131,8 @@ def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
     """
     Crea un selector de asistencia usando radio buttons con estilo personalizado
     """
-    # Opciones de asistencia
-    opciones = ["Presente", "Tardanza", "Ausente", "Justificado"]
+    # Opciones de asistencia (sin Justificado)
+    opciones = ["Presente", "Tardanza", "Ausente"]
     
     # Crear radio button horizontal
     seleccion = st.radio(
@@ -237,7 +228,6 @@ st.subheader("Resumen de Asistencia")
 ContadorPresentes = 0
 ContadorTardanzas = 0
 ContadorAusentes = 0
-ContadorJustificados = 0
 
 for estudiante in st.session_state.EstudiantesActuales:
     estado = st.session_state.Asistencias[estudiante["numero"]]
@@ -245,29 +235,20 @@ for estudiante in st.session_state.EstudiantesActuales:
         ContadorPresentes += 1
     elif estado == "Tardanza":
         ContadorTardanzas += 1
-    elif estado == "Justificado":
-        ContadorJustificados += 1
     else:
         ContadorAusentes += 1
 
 # Mostrar metricas
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Presentes", ContadorPresentes, 
-              delta=None, delta_color="normal")
+    st.metric("Presentes", ContadorPresentes)
 
 with col2:
-    st.metric("Tardanzas", ContadorTardanzas,
-              delta=None, delta_color="normal")
+    st.metric("Tardanzas", ContadorTardanzas)
 
 with col3:
-    st.metric("Ausentes", ContadorAusentes,
-              delta=None, delta_color="normal")
-
-with col4:
-    st.metric("Justificados", ContadorJustificados,
-              delta=None, delta_color="normal")
+    st.metric("Ausentes", ContadorAusentes)
 
 st.divider()
 
