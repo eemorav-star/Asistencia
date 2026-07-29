@@ -26,24 +26,6 @@ if "Asistencias" not in st.session_state:
         st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Procesar acciones de los botones via query params
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-query_params = st.query_params
-accion = query_params.get("accion", None)
-estudiante_id = query_params.get("estudiante", None)
-grupo_param = query_params.get("grupo", None)
-
-if accion and estudiante_id and grupo_param:
-    if accion == "presente":
-        st.session_state.Asistencias[estudiante_id] = "Presente"
-    elif accion == "tardanza":
-        st.session_state.Asistencias[estudiante_id] = "Tardanza"
-    # Limpiar query params y recargar
-    st.query_params.clear()
-    st.rerun()
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Funcion para cambiar de grupo
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
@@ -56,61 +38,52 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Funcion para crear botones HTML con estilo
+# CSS para estilos de botones
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-def crear_boton_personalizado(texto, estudiante_id, grupo, estado_actual, tipo):
-    """
-    Crea un botón HTML personalizado con estilo dinámico
-    tipo: 'presente' o 'tardanza'
-    """
-    if tipo == "presente":
-        color_activo = "#A4DE02"
-        color_inactivo = "#e0e0e0"
-        texto_color_activo = "black"
-        texto_color_inactivo = "#333333"
-        es_activo = (estado_actual == "Presente")
-        accion_url = "presente"
-    else:  # tardanza
-        color_activo = "#008CFF"
-        color_inactivo = "#e0e0e0"
-        texto_color_activo = "white"
-        texto_color_inactivo = "#333333"
-        es_activo = (estado_actual == "Tardanza")
-        accion_url = "tardanza"
-    
-    color_fondo = color_activo if es_activo else color_inactivo
-    color_texto = texto_color_activo if es_activo else texto_color_inactivo
-    borde = color_activo if es_activo else "#cccccc"
-    escala = "scale(1.05)" if es_activo else "scale(1)"
-    sombra = "0 4px 8px rgba(0,0,0,0.2)" if es_activo else "none"
-    
-    html_boton = f'''
-    <button 
-        onclick="window.location.href='?accion={accion_url}&estudiante={estudiante_id}&grupo={grupo}'" 
-        style="
-            background-color: {color_fondo};
-            color: {color_texto};
-            border: 2px solid {borde};
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            transform: {escala};
-            box-shadow: {sombra};
-            font-family: 'Source Sans Pro', sans-serif;
-            margin: 2px 0;
-        "
-        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'"
-        onmouseout="this.style.transform='{escala}';this.style.boxShadow='{sombra}'"
-    >
-        {texto}
-    </button>
-    '''
-    return html_boton
+def aplicar_estilos_botones():
+    st.markdown("""
+    <style>
+        /* Estilo base para todos los botones */
+        .stButton button {
+            width: 100% !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+            border-radius: 8px !important;
+            padding: 0.5rem 1rem !important;
+        }
+        
+        .stButton button:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        }
+        
+        /* Botón Presente - estado normal (inactivo) */
+        button[data-testid="baseButton-secondary"] {
+            background-color: #e0e0e0 !important;
+            color: #333333 !important;
+            border: 2px solid #cccccc !important;
+        }
+        
+        /* Botón Presente - estado activo (verde lima) */
+        button[data-testid="baseButton-secondary"][data-estado="Presente"] {
+            background-color: #A4DE02 !important;
+            color: black !important;
+            border: 2px solid #A4DE02 !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        }
+        
+        /* Botón Tardanza - estado activo (azul eléctrico) */
+        button[data-testid="baseButton-secondary"][data-estado="Tardanza"] {
+            background-color: #008CFF !important;
+            color: white !important;
+            border: 2px solid #008CFF !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Interfaz
@@ -148,6 +121,10 @@ st.divider()
 
 st.subheader("Registro de Asistencia")
 
+# Aplicar estilos CSS
+aplicar_estilos_botones()
+
+# Crear contenedores para cada estudiante
 for estudiante in st.session_state.EstudiantesActuales:
     numero = estudiante["numero"]
     nombre = estudiante["nombre"]
@@ -156,26 +133,64 @@ for estudiante in st.session_state.EstudiantesActuales:
     col1, col2, col3, col4 = st.columns([1,4,1,1])
 
     with col1:
-        st.write(numero)
+        st.write(f"**{numero}**")
 
     with col2:
         st.write(nombre)
 
     with col3:
-        # Botón Presente personalizado
-        html_presente = crear_boton_personalizado(
-            "Presente", numero, st.session_state.GrupoSeleccionado, 
-            estado_actual, "presente"
-        )
-        st.markdown(html_presente, unsafe_allow_html=True)
+        # Botón Presente con atributo data-estado para CSS
+        if st.button("Presente", key=f"P_{numero}_{grupo}"):
+            st.session_state.Asistencias[numero] = "Presente"
+            st.rerun()
+        
+        # Aplicar estilo según estado actual usando JavaScript
+        if estado_actual == "Presente":
+            st.markdown(f"""
+            <script>
+                (function() {{
+                    const buttons = document.querySelectorAll('button');
+                    for (let btn of buttons) {{
+                        if (btn.textContent.trim() === 'Presente' && 
+                            btn.id && btn.id.includes('P_{numero}_{grupo}')) {{
+                            btn.style.backgroundColor = '#A4DE02';
+                            btn.style.color = 'black';
+                            btn.style.border = '2px solid #A4DE02';
+                            btn.style.transform = 'scale(1.05)';
+                            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            btn.style.fontWeight = 'bold';
+                        }}
+                    }}
+                }})();
+            </script>
+            """, unsafe_allow_html=True)
 
     with col4:
-        # Botón Tardanza personalizado
-        html_tardanza = crear_boton_personalizado(
-            "Tardanza", numero, st.session_state.GrupoSeleccionado, 
-            estado_actual, "tardanza"
-        )
-        st.markdown(html_tardanza, unsafe_allow_html=True)
+        # Botón Tardanza
+        if st.button("Tardanza", key=f"T_{numero}_{grupo}"):
+            st.session_state.Asistencias[numero] = "Tardanza"
+            st.rerun()
+        
+        # Aplicar estilo según estado actual usando JavaScript
+        if estado_actual == "Tardanza":
+            st.markdown(f"""
+            <script>
+                (function() {{
+                    const buttons = document.querySelectorAll('button');
+                    for (let btn of buttons) {{
+                        if (btn.textContent.trim() === 'Tardanza' && 
+                            btn.id && btn.id.includes('T_{numero}_{grupo}')) {{
+                            btn.style.backgroundColor = '#008CFF';
+                            btn.style.color = 'white';
+                            btn.style.border = '2px solid #008CFF';
+                            btn.style.transform = 'scale(1.05)';
+                            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            btn.style.fontWeight = 'bold';
+                        }}
+                    }}
+                }})();
+            </script>
+            """, unsafe_allow_html=True)
 
 st.divider()
 
@@ -201,13 +216,16 @@ for estudiante in st.session_state.EstudiantesActuales:
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Presentes", ContadorPresentes)
+    st.metric("Presentes", ContadorPresentes, 
+              delta=None, delta_color="normal")
 
 with col2:
-    st.metric("Tardanzas", ContadorTardanzas)
+    st.metric("Tardanzas", ContadorTardanzas,
+              delta=None, delta_color="normal")
 
 with col3:
-    st.metric("Ausentes", ContadorAusentes)
+    st.metric("Ausentes", ContadorAusentes,
+              delta=None, delta_color="normal")
 
 st.divider()
 
@@ -218,25 +236,31 @@ st.divider()
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("Guardar Asistencia"):
+    if st.button("Guardar Asistencia", key="guardar_asistencia"):
         try:
             GuardarAsistencia(
                 st.session_state.GrupoSeleccionado,
                 st.session_state.EstudiantesActuales,
                 st.session_state.Asistencias
             )
-            st.success("La asistencia fue guardada correctamente.")
+            st.success("✅ La asistencia fue guardada correctamente.")
         except Exception as e:
-            st.error(f"Error al guardar: {e}")
+            st.error(f"❌ Error al guardar: {e}")
 
 with col2:
-    if st.button("Reiniciar Asistencia"):
+    if st.button("Reiniciar Asistencia", key="reiniciar_asistencia"):
         for estudiante in st.session_state.EstudiantesActuales:
             st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
-        st.success("Asistencia reiniciada.")
+        st.success("🔄 Asistencia reiniciada.")
         st.rerun()
 
-VerVistaPrevia = st.checkbox("Ver vista previa antes de descargar")
+st.divider()
+
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Vista previa
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+VerVistaPrevia = st.checkbox("📊 Ver vista previa antes de descargar")
 
 if VerVistaPrevia:
     FilasPreview = []
@@ -248,3 +272,12 @@ if VerVistaPrevia:
 
     DfPreview = pd.DataFrame(FilasPreview)
     st.dataframe(DfPreview, hide_index=True, use_container_width=True)
+    
+    # Botón para descargar CSV
+    csv = DfPreview.to_csv(index=False)
+    st.download_button(
+        label="📥 Descargar CSV",
+        data=csv,
+        file_name=f"asistencia_grupo_{st.session_state.GrupoSeleccionado}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        mime="text/csv",
+    )
