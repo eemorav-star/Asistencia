@@ -10,6 +10,28 @@ from datetime import datetime
 from grupos import GrupoA,Grupos
 from exc import GuardarAsistencia
 
+# Procesar parámetros de URL para los botones HTML
+import urllib.parse
+
+query_params = st.query_params
+for key, value in query_params.items():
+    if key.startswith('presente_'):
+        parts = key.split('_')
+        if len(parts) == 3:
+            num = parts[1]
+            grp = parts[2]
+            st.session_state.Asistencias[num] = "Presente"
+            st.query_params.clear()
+            st.rerun()
+    elif key.startswith('tardanza_'):
+        parts = key.split('_')
+        if len(parts) == 3:
+            num = parts[1]
+            grp = parts[2]
+            st.session_state.Asistencias[num] = "Tardanza"
+            st.query_params.clear()
+            st.rerun()
+
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Inicializar estado de la sesion
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
@@ -91,43 +113,36 @@ st.divider()
 
 st.subheader("Registro de Asistencia")
 
-# Aplicar estilos globales para todos los botones
+# CSS para estilos de botones
 st.markdown("""
 <style>
-    /* Estilo para botón Presente cuando está activo */
-    .stButton button[kind="secondary"] {
+    /* Estilos base para todos los botones */
+    .stButton button {
         transition: all 0.3s ease !important;
+        font-weight: bold !important;
+        width: 100% !important;
     }
     
-    /* Estilo para el botón Presente activo */
-    button[data-testid="baseButton-secondary"] {
-        background-color: #e0e0e0 !important;
-        color: #333333 !important;
-        border: 2px solid #cccccc !important;
-    }
-    
-    /* Estilo específico para botones Presente activos */
-    button[data-testid="baseButton-secondary"]:has(> div:contains("Presente")) {
+    /* Estilo para botón Presente cuando está activo */
+    .presente-activo {
         background-color: #A4DE02 !important;
         color: black !important;
         border: 2px solid #A4DE02 !important;
-        font-weight: bold !important;
         transform: scale(1.05) !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
     }
     
-    /* Estilo específico para botones Tardanza activos */
-    button[data-testid="baseButton-secondary"]:has(> div:contains("Tardanza")) {
+    /* Estilo para botón Tardanza cuando está activo */
+    .tardanza-activo {
         background-color: #008CFF !important;
         color: white !important;
         border: 2px solid #008CFF !important;
-        font-weight: bold !important;
         transform: scale(1.05) !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
     }
     
     /* Hover effects */
-    button[data-testid="baseButton-secondary"]:hover {
+    .stButton button:hover {
         transform: scale(1.05) !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
     }
@@ -137,45 +152,39 @@ st.markdown("""
 for estudiante in st.session_state.EstudiantesActuales:
 
     numero = estudiante["numero"]
-
     nombre = estudiante["nombre"]
+    estado_actual = st.session_state.Asistencias[numero]
 
     col1,col2,col3,col4 = st.columns([1,4,1,1])
 
     with col1:
-
         st.write(numero)
 
     with col2:
-
         st.write(nombre)
 
     with col3:
-        # Obtener el estado actual del estudiante
-        estado_actual = st.session_state.Asistencias[numero]
-        
         # Botón Presente
         if st.button("Presente", key=f"P_{numero}_{grupo}"):
             st.session_state.Asistencias[numero] = "Presente"
             st.rerun()
         
-        # Aplicar estilo específico al botón Presente si está activo
+        # Aplicar clase CSS si está activo
         if estado_actual == "Presente":
-            # Usamos JavaScript para cambiar el estilo directamente
             st.markdown(f"""
             <script>
                 (function() {{
-                    var buttons = document.querySelectorAll('button');
-                    for(var i = 0; i < buttons.length; i++) {{
-                        if(buttons[i].innerText.trim() === 'Presente' && buttons[i].id.includes('P_{numero}_{grupo}')) {{
-                            buttons[i].style.backgroundColor = '#A4DE02';
-                            buttons[i].style.color = 'black';
-                            buttons[i].style.borderColor = '#A4DE02';
-                            buttons[i].style.fontWeight = 'bold';
-                            buttons[i].style.transform = 'scale(1.05)';
-                            buttons[i].style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-                            buttons[i].style.border = '2px solid #A4DE02';
-                            buttons[i].style.transition = 'all 0.3s ease';
+                    // Buscar el botón específico
+                    const buttons = document.querySelectorAll('button');
+                    for (let btn of buttons) {{
+                        if (btn.textContent.trim() === 'Presente' && btn.id && btn.id.includes('P_{numero}_{grupo}')) {{
+                            btn.className += ' presente-activo';
+                            btn.style.backgroundColor = '#A4DE02';
+                            btn.style.color = 'black';
+                            btn.style.border = '2px solid #A4DE02';
+                            btn.style.transform = 'scale(1.05)';
+                            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            btn.style.fontWeight = 'bold';
                         }}
                     }}
                 }})();
@@ -183,30 +192,27 @@ for estudiante in st.session_state.EstudiantesActuales:
             """, unsafe_allow_html=True)
 
     with col4:
-        # Obtener el estado actual del estudiante
-        estado_actual = st.session_state.Asistencias[numero]
-        
         # Botón Tardanza
         if st.button("Tardanza", key=f"T_{numero}_{grupo}"):
             st.session_state.Asistencias[numero] = "Tardanza"
             st.rerun()
         
-        # Aplicar estilo específico al botón Tardanza si está activo
+        # Aplicar clase CSS si está activo
         if estado_actual == "Tardanza":
             st.markdown(f"""
             <script>
                 (function() {{
-                    var buttons = document.querySelectorAll('button');
-                    for(var i = 0; i < buttons.length; i++) {{
-                        if(buttons[i].innerText.trim() === 'Tardanza' && buttons[i].id.includes('T_{numero}_{grupo}')) {{
-                            buttons[i].style.backgroundColor = '#008CFF';
-                            buttons[i].style.color = 'white';
-                            buttons[i].style.borderColor = '#008CFF';
-                            buttons[i].style.fontWeight = 'bold';
-                            buttons[i].style.transform = 'scale(1.05)';
-                            buttons[i].style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-                            buttons[i].style.border = '2px solid #008CFF';
-                            buttons[i].style.transition = 'all 0.3s ease';
+                    // Buscar el botón específico
+                    const buttons = document.querySelectorAll('button');
+                    for (let btn of buttons) {{
+                        if (btn.textContent.trim() === 'Tardanza' && btn.id && btn.id.includes('T_{numero}_{grupo}')) {{
+                            btn.className += ' tardanza-activo';
+                            btn.style.backgroundColor = '#008CFF';
+                            btn.style.color = 'white';
+                            btn.style.border = '2px solid #008CFF';
+                            btn.style.transform = 'scale(1.05)';
+                            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            btn.style.fontWeight = 'bold';
                         }}
                     }}
                 }})();
@@ -214,6 +220,7 @@ for estudiante in st.session_state.EstudiantesActuales:
             """, unsafe_allow_html=True)
 
 st.divider()
+
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Resumen de Asistencia
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
@@ -224,40 +231,24 @@ ContadorPresentes = 0
 ContadorTardanzas = 0
 ContadorAusentes = 0
 
-i = 0
-
-while i < len(st.session_state.EstudiantesActuales):
-
-    numero = st.session_state.EstudiantesActuales[i]["numero"]
-
-    estado = st.session_state.Asistencias[numero]
-
+for estudiante in st.session_state.EstudiantesActuales:
+    estado = st.session_state.Asistencias[estudiante["numero"]]
     if estado == "Presente":
-
         ContadorPresentes += 1
-
     elif estado == "Tardanza":
-
         ContadorTardanzas += 1
-
     else:
-
         ContadorAusentes += 1
-
-    i += 1
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-
     st.metric("Presentes", ContadorPresentes)
 
 with col2:
-
     st.metric("Tardanzas", ContadorTardanzas)
 
 with col3:
-
     st.metric("Ausentes", ContadorAusentes)
 
 st.divider()
@@ -269,37 +260,22 @@ st.divider()
 col1, col2 = st.columns(2)
 
 with col1:
-
     if st.button("Guardar Asistencia"):
-
         try:
-
             GuardarAsistencia(
-
                 st.session_state.GrupoSeleccionado,
-
                 st.session_state.EstudiantesActuales,
-
                 st.session_state.Asistencias
-
             )
-
             st.success("La asistencia fue guardada correctamente.")
-
         except Exception as e:
-
             st.error(f"Error al guardar: {e}")
 
 with col2:
-
     if st.button("Reiniciar Asistencia"):
-
         for estudiante in st.session_state.EstudiantesActuales:
-
             st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
-
         st.success("Asistencia reiniciada.")
-
         st.rerun()
 
 VerVistaPrevia = st.checkbox("Ver vista previa antes de descargar")
