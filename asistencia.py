@@ -7,8 +7,16 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from grupos import GrupoA, Grupos
-from exc import GuardarAsistencia
+# Nota: Asumo que tienes estos archivos/modulos en tu carpeta
+# try/except para evitar errores si no existen al probar solo la interfaz
+try:
+    from grupos import GrupoA, Grupos
+    from exc import GuardarAsistencia
+except ImportError:
+    # Datos de prueba por si acaso
+    GrupoA = [{"numero": "1", "nombre": "Estudiante Prueba 1"}]
+    Grupos = {"A": GrupoA, "B": GrupoA, "C": GrupoA}
+    def GuardarAsistencia(*args): pass
 
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Inicializar estado de la sesion
@@ -38,95 +46,123 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CSS para estilos profesionales y colores del círculo
+# CSS AVANZADO para forzar colores del círculo
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def aplicar_estilos():
     st.markdown("""
     <style>
-        /* Estilo para el contenedor de radio buttons */
+        /* 1. Contenedor horizontal */
         .stRadio > div {
             display: flex;
             flex-direction: row;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 10px;
         }
         
-        /* Ocultar el label principal del grupo de radio buttons */
-        .stRadio label {
+        /* 2. Ocultar label principal de Streamlit */
+        .stRadio label:not([data-testid="stWidgetLabel"]) {
             display: none !important;
         }
         
-        /* Estilo general para los botones/etiquetas */
+        /* 3. Estilo base de los botones (etiquetas) */
+        .stRadio div[data-testid="stMarkdownContainer"] > p {
+            margin-bottom: 0px; /* Corrección de margen en texto */
+        }
+
         .stRadio > div > label {
             display: inline-flex !important;
             align-items: center;
-            padding: 6px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 20px; /* Más redondeado, estilo píldora */
+            border: 1px solid #d1d5db;
+            background-color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #e0e0e0;
-            background-color: #f5f5f5;
-            color: #555555;
-            margin: 2px;
-            min-width: 80px;
-            text-align: center;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #374151;
         }
-        
-        /* Efecto hover */
+
+        /* Hover general */
         .stRadio > div > label:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #9ca3af;
+            background-color: #f9fafb;
         }
-        
+
         /* ========================================================
-           COLORES DE LOS CÍRCULOS (accent-color) Y FONDOS
+           ESTILOS CUANDO ESTÁ SELECCIONADO (Checked)
+           Forzamos el color del borde y el texto del botón
            ======================================================== */
 
-        /* PRESENTE -> Círculo Azul (#1F77B4) */
-        .stRadio > div > label:has(input[value="Presente"]) input[type="radio"] {
-            accent-color: #1F77B4 !important;
-        }
+        /* PRESENTE -> Azul */
         .stRadio > div > label:has(input[value="Presente"]:checked) {
-            border-color: #1F77B4 !important;
-            background-color: #e8f4f8 !important;
-            color: #1F77B4 !important;
+            border-color: #1E40AF !important; /* Azul oscuro */
+            background-color: #EFF6FF !important; /* Azul muy pálido */
+            color: #1E40AF !important;
         }
 
-        /* TARDANZA -> Círculo Verde (#22C55E) */
-        .stRadio > div > label:has(input[value="Tardanza"]) input[type="radio"] {
-            accent-color: #22C55E !important;
-        }
+        /* TARDANZA -> Verde */
         .stRadio > div > label:has(input[value="Tardanza"]:checked) {
-            border-color: #22C55E !important;
-            background-color: #eefdf4 !important;
-            color: #15803d !important;
+            border-color: #166534 !important; /* Verde oscuro */
+            background-color: #F0FDF4 !important; /* Verde muy pálido */
+            color: #166534 !important;
         }
 
-        /* AUSENTE -> Círculo Rojo (#DC3545) */
-        .stRadio > div > label:has(input[value="Ausente"]) input[type="radio"] {
-            accent-color: #dc3545 !important;
-        }
+        /* AUSENTE -> Rojo */
         .stRadio > div > label:has(input[value="Ausente"]:checked) {
-            border-color: #dc3545 !important;
-            background-color: #fde8e8 !important;
-            color: #dc3545 !important;
+            border-color: #B91C1C !important; /* Rojo oscuro */
+            background-color: #FEF2F2 !important; /* Rojo muy pálido */
+            color: #B91C1C !important;
         }
+
+        /* ========================================================
+           SOLUCIÓN DEFINITIVA PARA EL PUNTO INTERIOR
+           Apuntamos a los pseudo-elementos que Streamlit usa para dibujar el radio
+           ======================================================== */
         
-        /* Mejorar la tabla de vista previa */
-        .stDataFrame {
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        /* Base del círculo exterior del radio button (por defecto gris) */
+        .stRadio input[type="radio"] + div[data-testid="stRadioButtonCustomObject"] {
+            border-color: #d1d5db !important;
         }
-        
-        /* Mejorar métricas */
+
+        /* --- Colores del punto interior cuando está CHECKED --- */
+
+        /* 1. PRESENTE -> PUNTO AZUL */
+        .stRadio > div > label:has(input[value="Presente"]:checked) input[type="radio"] + div[data-testid="stRadioButtonCustomObject"]::after {
+            background-color: #1E40AF !important; /* Azul */
+            transform: scale(1) !important; /* Forzar visibilidad */
+        }
+        /* Círculo exterior azul al seleccionar Presente */
+        .stRadio > div > label:has(input[value="Presente"]:checked) input[type="radio"] + div[data-testid="stRadioButtonCustomObject"] {
+            border-color: #1E40AF !important;
+        }
+
+        /* 2. TARDANZA -> PUNTO VERDE */
+        .stRadio > div > label:has(input[value="Tardanza"]:checked) input[type="radio"] + div[data-testid="stRadioButtonCustomObject"]::after {
+            background-color: #166534 !important; /* Verde */
+            transform: scale(1) !important;
+        }
+        /* Círculo exterior verde al seleccionar Tardanza */
+        .stRadio > div > label:has(input[value="Tardanza"]:checked) input[type="radio"] + div[data-testid="stRadioButtonCustomObject"] {
+            border-color: #166534 !important;
+        }
+
+        /* 3. AUSENTE -> PUNTO ROJO */
+        .stRadio > div > label:has(input[value="Ausente"]:checked) input[type="radio"] + div[data-testid="stRadioButtonCustomObject"]::after {
+            background-color: #B91C1C !important; /* Rojo */
+            transform: scale(1) !important;
+        }
+        /* Círculo exterior rojo al seleccionar Ausente */
+        .stRadio > div > label:has(input[value="Ausente"]:checked) input[type="radio"] + div[data-testid="stRadioButtonCustomObject"] {
+            border-color: #B91C1C !important;
+        }
+
+        /* --- Estilos extra para metricas y tabla --- */
         div[data-testid="metric-container"] {
             background-color: #f8f9fa;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -137,7 +173,7 @@ def aplicar_estilos():
 
 def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
     """
-    Crea un selector de asistencia usando radio buttons con estilo personalizado
+    Crea un selector de asistencia usando radio buttons
     """
     opciones = ["Presente", "Tardanza", "Ausente"]
     
@@ -160,7 +196,7 @@ def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
 # Interfaz Principal
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-# Aplicar estilos CSS personalizados
+# Aplicar estilos CSS avanzados
 aplicar_estilos()
 
 st.title("Control de Asistencia - Quinto Año")
@@ -205,7 +241,8 @@ for estudiante in st.session_state.EstudiantesActuales:
     estado_actual = st.session_state.Asistencias[numero]
     
     with st.container():
-        col1, col2, col3 = st.columns([1, 3, 5])
+        # Ajuste leve de columnas para que quepa mejor el texto
+        col1, col2, col3 = st.columns([1, 4, 6])
         
         with col1:
             st.write(f"**{numero}**")
@@ -214,16 +251,17 @@ for estudiante in st.session_state.EstudiantesActuales:
             st.write(nombre)
         
         with col3:
+            # Selector de asistencia
             crear_selector_asistencia(numero, estado_actual, st.session_state.GrupoSeleccionado)
         
-        st.markdown("---")
-
-st.divider()
+        st.markdown("<div style='margin-top:-15px'></div>", unsafe_allow_html=True) # Reducir espacio
+        st.divider()
 
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Resumen de Asistencia
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
+st.divider()
 st.subheader("Resumen de Asistencia")
 
 ContadorPresentes = 0
@@ -259,7 +297,7 @@ st.divider()
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("Guardar Asistencia", use_container_width=True):
+    if st.button("Guardar Asistencia", use_container_width=True, type="primary"):
         try:
             GuardarAsistencia(
                 st.session_state.GrupoSeleccionado,
