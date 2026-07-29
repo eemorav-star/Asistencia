@@ -73,6 +73,23 @@ GrupoD = [
     {"numero": 14, "nombre": "GUERRA RUTH"},
     {"numero": 15, "nombre": "JIMENEZ ANTHONY"}
 ]
+GrupoE = [
+    {"numero": 1, "nombre": "ABREGO GINNETHE"},
+    {"numero": 2, "nombre": "ABREGO IVY"},
+    {"numero": 3, "nombre": "ARCIA KRISTY"},
+    {"numero": 4, "nombre": "CAÑATE KEVIN"},
+    {"numero": 5, "nombre": "CARDENAS BOLIVAR"},
+    {"numero": 6, "nombre": "CHEN ADRIANA"},
+    {"numero": 7, "nombre": "COCIO PAOLA"},
+    {"numero": 8, "nombre": "DELGADO ANDHRA"},
+    {"numero": 9, "nombre": "DOMINGUEZ YAZUHANY"},
+    {"numero": 10, "nombre": "FONSECA ROLANDO"},
+    {"numero": 11, "nombre": "FRANCO PABLO"},
+    {"numero": 12, "nombre": "FUENTES YETZABEL"},
+    {"numero": 13, "nombre": "GOMEZ DANIEL"},
+    {"numero": 14, "nombre": "GOMEZ THAISBETH"},
+    {"numero": 15, "nombre": "GUILLEN OSAVALDO"}
+]
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Diccionario para mapear grupos
@@ -82,5 +99,6 @@ Grupos = {
     "A": GrupoA,
     "B": GrupoB,
     "C": GrupoC,
-    "D": GrupoD
+    "D": GrupoD,
+    "E": GrupoE,
 }
