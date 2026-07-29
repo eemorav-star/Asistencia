@@ -1,8 +1,8 @@
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Universidad Tecnologica de Panama
 # Semestral de Herramientas de programacion 1
 # Integrantes: Jaen Kathya, Luna Adrian, Mora Elpidio
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 import streamlit as st
 import pandas as pd
@@ -10,9 +10,9 @@ from datetime import datetime
 from grupos import GrupoA, Grupos
 from exc import GuardarAsistencia
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Inicializar estado de la sesion
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 if "GrupoSeleccionado" not in st.session_state:
     st.session_state.GrupoSeleccionado = "A"
@@ -25,9 +25,9 @@ if "Asistencias" not in st.session_state:
     for estudiante in GrupoA:
         st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Funcion para cambiar de grupo
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def CambiarGrupo(grupo):
     st.session_state.EstudiantesActuales = Grupos[grupo]
@@ -37,9 +37,9 @@ def CambiarGrupo(grupo):
     st.session_state.GrupoSeleccionado = grupo
     st.rerun()
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # CSS para estilos profesionales
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def aplicar_estilos():
     st.markdown("""
@@ -80,7 +80,7 @@ def aplicar_estilos():
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
-        /* Estilo para boton seleccionado - Presente */
+        /* Estilo para boton seleccionado - Presente (AZUL) */
         .stRadio > div > label:has(input[value="Presente"]:checked) {
             background-color: #1F77B4 !important;
             color: white !important;
@@ -89,7 +89,7 @@ def aplicar_estilos():
             box-shadow: 0 4px 12px rgba(31, 119, 180, 0.3);
         }
         
-        /* Estilo para boton seleccionado - Tardanza */
+        /* Estilo para boton seleccionado - Tardanza (VERDE) */
         .stRadio > div > label:has(input[value="Tardanza"]:checked) {
             background-color: #22C55E !important;
             color: white !important;
@@ -98,7 +98,7 @@ def aplicar_estilos():
             box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
         
-        /* Estilo para boton seleccionado - Ausente */
+        /* Estilo para boton seleccionado - Ausente (ROJO) */
         .stRadio > div > label:has(input[value="Ausente"]:checked) {
             background-color: #dc3545 !important;
             color: white !important;
@@ -123,18 +123,16 @@ def aplicar_estilos():
     </style>
     """, unsafe_allow_html=True)
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Funcion para crear radio buttons personalizados
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
     """
     Crea un selector de asistencia usando radio buttons con estilo personalizado
     """
-    # Opciones de asistencia (sin Justificado)
     opciones = ["Presente", "Tardanza", "Ausente"]
     
-    # Crear radio button horizontal
     seleccion = st.radio(
         label=f"Asistencia_{estudiante_id}",
         options=opciones,
@@ -144,18 +142,16 @@ def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
         label_visibility="collapsed"
     )
     
-    # Actualizar el estado si cambia
     if seleccion != estado_actual:
         st.session_state.Asistencias[estudiante_id] = seleccion
         st.rerun()
     
     return seleccion
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Interfaz Principal
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-# Aplicar estilos
 aplicar_estilos()
 
 st.title("Control de Asistencia - Quinto Año")
@@ -199,7 +195,6 @@ for estudiante in st.session_state.EstudiantesActuales:
     nombre = estudiante["nombre"]
     estado_actual = st.session_state.Asistencias[numero]
     
-    # Crear un contenedor para cada estudiante
     with st.container():
         col1, col2, col3 = st.columns([1, 3, 5])
         
@@ -210,21 +205,18 @@ for estudiante in st.session_state.EstudiantesActuales:
             st.write(nombre)
         
         with col3:
-            # Selector de asistencia con radio buttons
             crear_selector_asistencia(numero, estado_actual, st.session_state.GrupoSeleccionado)
         
-        # Linea separadora sutil
         st.markdown("---")
 
 st.divider()
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Resumen de Asistencia
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 st.subheader("Resumen de Asistencia")
 
-# Contar estados
 ContadorPresentes = 0
 ContadorTardanzas = 0
 ContadorAusentes = 0
@@ -238,7 +230,6 @@ for estudiante in st.session_state.EstudiantesActuales:
     else:
         ContadorAusentes += 1
 
-# Mostrar metricas
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -252,9 +243,9 @@ with col3:
 
 st.divider()
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Botones de accion
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 col1, col2 = st.columns(2)
 
@@ -279,9 +270,9 @@ with col2:
 
 st.divider()
 
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Vista previa y descarga
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 VerVistaPrevia = st.checkbox("Ver vista previa antes de descargar")
 
@@ -296,7 +287,6 @@ if VerVistaPrevia:
     DfPreview = pd.DataFrame(FilasPreview)
     st.dataframe(DfPreview, hide_index=True, use_container_width=True)
     
-    # Boton de descarga
     csv = DfPreview.to_csv(index=False)
     st.download_button(
         label="Descargar CSV",
