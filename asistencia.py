@@ -26,25 +26,6 @@ if "Asistencias" not in st.session_state:
         st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Procesar acciones de los botones via query params
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-query_params = st.query_params
-accion = query_params.get("accion", None)
-estudiante_id = query_params.get("estudiante", None)
-grupo_param = query_params.get("grupo", None)
-
-if accion and estudiante_id and grupo_param:
-    if accion == "presente":
-        st.session_state.Asistencias[estudiante_id] = "Presente"
-    elif accion == "tardanza":
-        st.session_state.Asistencias[estudiante_id] = "Tardanza"
-    elif accion == "ausente":
-        st.session_state.Asistencias[estudiante_id] = "Ausente"
-    st.query_params.clear()
-    st.rerun()
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Funcion para cambiar de grupo
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
@@ -57,75 +38,92 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Funcion para crear botones con estilo usando components
+# CSS para estilos de botones
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-def crear_boton_asistencia(texto, estudiante_id, grupo, estado_actual, tipo):
-    """
-    Crea un boton HTML con estilo dinamico usando st.components
-    tipo: 'presente', 'tardanza', o 'ausente'
-    """
-    # Configurar colores segun tipo
-    if tipo == "presente":
-        color_activo = "#1F77B4"  # Azul
-        es_activo = (estado_actual == "Presente")
-        accion = "presente"
-    elif tipo == "tardanza":
-        color_activo = "#22C55E"  # Verde
-        es_activo = (estado_actual == "Tardanza")
-        accion = "tardanza"
-    else:  # ausente
-        color_activo = "#dc3545"  # Rojo
-        es_activo = (estado_actual == "Ausente")
-        accion = "ausente"
-    
-    # Determinar colores segun estado
-    if es_activo:
-        bg_color = color_activo
-        text_color = "white"
-        border_color = color_activo
-        transform = "scale(1.05)"
-        shadow = "0 4px 12px rgba(0,0,0,0.2)"
-        font_weight = "700"
-    else:
-        bg_color = "#f3f4f6"
-        text_color = "#6b7280"
-        border_color = "#d1d5db"
-        transform = "scale(1)"
-        shadow = "none"
-        font_weight = "500"
-    
-    html = f'''
-    <button 
-        onclick="window.location.href='?accion={accion}&estudiante={estudiante_id}&grupo={grupo}'" 
-        style="
-            background-color: {bg_color};
-            color: {text_color};
-            border: 2px solid {border_color};
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-weight: {font_weight};
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            transform: {transform};
-            box-shadow: {shadow};
-            font-family: 'Source Sans Pro', sans-serif;
-            margin: 2px 4px;
-            min-width: 80px;
-            letter-spacing: 0.3px;
-        "
-        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'"
-        onmouseout="this.style.transform='{transform}';this.style.boxShadow='{shadow}'"
-    >
-        {texto}
-    </button>
-    '''
-    return html
+def aplicar_estilos():
+    st.markdown("""
+    <style>
+        /* Estilo base para botones */
+        .stButton button {
+            border-radius: 20px !important;
+            padding: 6px 18px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            margin: 2px 4px !important;
+            min-width: 80px !important;
+            border: 2px solid #d1d5db !important;
+            background-color: #f3f4f6 !important;
+            color: #6b7280 !important;
+            height: auto !important;
+        }
+        
+        .stButton button:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+        
+        /* Estilo para boton Presente activo */
+        .presente-activo {
+            background-color: #1F77B4 !important;
+            color: white !important;
+            border-color: #1F77B4 !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 12px rgba(31, 119, 180, 0.3) !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Estilo para boton Tardanza activo */
+        .tardanza-activo {
+            background-color: #22C55E !important;
+            color: white !important;
+            border-color: #22C55E !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3) !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Estilo para boton Ausente activo */
+        .ausente-activo {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Contenedor de botones */
+        div[data-testid="column"]:nth-child(3) {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            gap: 2px !important;
+        }
+        
+        /* Mejorar tabla */
+        .stDataFrame {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Mejorar metricas */
+        div[data-testid="metric-container"] {
+            background-color: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Interfaz Principal
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+# Aplicar estilos
+aplicar_estilos()
 
 st.title("Control de Asistencia - Quinto Año")
 
@@ -168,38 +166,96 @@ for idx, estudiante in enumerate(st.session_state.EstudiantesActuales):
     nombre = estudiante["nombre"]
     estado_actual = st.session_state.Asistencias[numero]
     
-    with st.container():
-        col1, col2, col3 = st.columns([0.5, 2.5, 7])
+    col1, col2, col3 = st.columns([0.5, 2.5, 7])
+    
+    with col1:
+        st.write(f"**{numero}.**")
+    
+    with col2:
+        st.write(f"**{nombre}**")
+    
+    with col3:
+        # Boton Presente
+        boton_presente = st.button(
+            "Presente", 
+            key=f"P_{numero}_{grupo}_{idx}",
+            use_container_width=False
+        )
+        if boton_presente:
+            st.session_state.Asistencias[numero] = "Presente"
+            st.rerun()
         
-        with col1:
-            st.write(f"**{numero}.**")
+        # Aplicar clase CSS si esta activo
+        if estado_actual == "Presente":
+            st.markdown(f"""
+            <script>
+                (function() {{
+                    const buttons = document.querySelectorAll('button');
+                    for (let btn of buttons) {{
+                        if (btn.textContent.trim() === 'Presente' && 
+                            btn.id && btn.id.includes('P_{numero}_{grupo}_{idx}')) {{
+                            btn.classList.add('presente-activo');
+                        }}
+                    }}
+                }})();
+            </script>
+            """, unsafe_allow_html=True)
         
-        with col2:
-            st.write(f"**{nombre}**")
+        # Boton Tardanza
+        boton_tardanza = st.button(
+            "Tardanza", 
+            key=f"T_{numero}_{grupo}_{idx}",
+            use_container_width=False
+        )
+        if boton_tardanza:
+            st.session_state.Asistencias[numero] = "Tardanza"
+            st.rerun()
         
-        with col3:
-            # Crear los tres botones usando components
-            html_presente = crear_boton_asistencia(
-                "Presente", numero, st.session_state.GrupoSeleccionado, 
-                estado_actual, "presente"
-            )
-            html_tardanza = crear_boton_asistencia(
-                "Tardanza", numero, st.session_state.GrupoSeleccionado, 
-                estado_actual, "tardanza"
-            )
-            html_ausente = crear_boton_asistencia(
-                "Ausente", numero, st.session_state.GrupoSeleccionado, 
-                estado_actual, "ausente"
-            )
-            
-            # Mostrar los botones con components (mas confiable)
-            st.components.v1.html(html_presente, height=45)
-            st.components.v1.html(html_tardanza, height=45)
-            st.components.v1.html(html_ausente, height=45)
+        # Aplicar clase CSS si esta activo
+        if estado_actual == "Tardanza":
+            st.markdown(f"""
+            <script>
+                (function() {{
+                    const buttons = document.querySelectorAll('button');
+                    for (let btn of buttons) {{
+                        if (btn.textContent.trim() === 'Tardanza' && 
+                            btn.id && btn.id.includes('T_{numero}_{grupo}_{idx}')) {{
+                            btn.classList.add('tardanza-activo');
+                        }}
+                    }}
+                }})();
+            </script>
+            """, unsafe_allow_html=True)
         
-        # Linea separadora
-        if idx < len(st.session_state.EstudiantesActuales) - 1:
-            st.markdown("---")
+        # Boton Ausente
+        boton_ausente = st.button(
+            "Ausente", 
+            key=f"A_{numero}_{grupo}_{idx}",
+            use_container_width=False
+        )
+        if boton_ausente:
+            st.session_state.Asistencias[numero] = "Ausente"
+            st.rerun()
+        
+        # Aplicar clase CSS si esta activo
+        if estado_actual == "Ausente":
+            st.markdown(f"""
+            <script>
+                (function() {{
+                    const buttons = document.querySelectorAll('button');
+                    for (let btn of buttons) {{
+                        if (btn.textContent.trim() === 'Ausente' && 
+                            btn.id && btn.id.includes('A_{numero}_{grupo}_{idx}')) {{
+                            btn.classList.add('ausente-activo');
+                        }}
+                    }}
+                }})();
+            </script>
+            """, unsafe_allow_html=True)
+    
+    # Linea separadora
+    if idx < len(st.session_state.EstudiantesActuales) - 1:
+        st.markdown("---")
 
 st.divider()
 
