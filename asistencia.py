@@ -38,74 +38,158 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CSS para estilos de botones
+# CSS para estilos profesionales
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-def aplicar_estilos_botones():
+def aplicar_estilos():
     st.markdown("""
     <style>
-        /* Estilo base para todos los botones */
-        .stButton button {
-            width: 100% !important;
-            font-weight: bold !important;
-            transition: all 0.3s ease !important;
-            border-radius: 8px !important;
-            padding: 0.5rem 1rem !important;
-            border: 2px solid #cccccc !important;
-            background-color: #e0e0e0 !important;
-            color: #333333 !important;
+        /* Estilo para el contenedor de radio buttons */
+        .stRadio > div {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         
-        .stButton button:hover {
-            transform: scale(1.05) !important;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        /* Ocultar el label del radio */
+        .stRadio label {
+            display: none !important;
         }
         
-        /* Estilo para botón Presente cuando está activo */
-        .presente-activo {
+        /* Estilo para los radio buttons */
+        .stRadio > div > label {
+            display: inline-block !important;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            background-color: #f5f5f5;
+            color: #555555;
+            margin: 2px;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        /* Efecto hover */
+        .stRadio > div > label:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Estilo para boton seleccionado - Presente */
+        .stRadio > div > label:has(input[value="Presente"]:checked) {
             background-color: #1F77B4 !important;
             color: white !important;
-            border: 2px solid #1F77B4 !important;
-            transform: scale(1.05) !important;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+            border-color: #1F77B4 !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(31, 119, 180, 0.3);
         }
         
-        /* Estilo para botón Tardanza cuando está activo */
-        .tardanza-activo {
+        /* Estilo para boton seleccionado - Tardanza */
+        .stRadio > div > label:has(input[value="Tardanza"]:checked) {
             background-color: #22C55E !important;
             color: white !important;
-            border: 2px solid #22C55E !important;
-            transform: scale(1.05) !important;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+            border-color: #22C55E !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+        
+        /* Estilo para boton seleccionado - Ausente */
+        .stRadio > div > label:has(input[value="Ausente"]:checked) {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        
+        /* Estilo para boton seleccionado - Justificado */
+        .stRadio > div > label:has(input[value="Justificado"]:checked) {
+            background-color: #ff8c00 !important;
+            color: white !important;
+            border-color: #ff8c00 !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+        }
+        
+        /* Mejorar la tabla de vista previa */
+        .stDataFrame {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Mejorar metricas */
+        div[data-testid="metric-container"] {
+            background-color: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
     </style>
     """, unsafe_allow_html=True)
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Interfaz
+# Funcion para crear radio buttons personalizados
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-st.title("🎓 Control de Asistencia - Quinto Año")
+def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
+    """
+    Crea un selector de asistencia usando radio buttons con estilo personalizado
+    """
+    # Opciones de asistencia
+    opciones = ["Presente", "Tardanza", "Ausente", "Justificado"]
+    
+    # Crear radio button horizontal
+    seleccion = st.radio(
+        label=f"Asistencia_{estudiante_id}",
+        options=opciones,
+        index=opciones.index(estado_actual) if estado_actual in opciones else 0,
+        key=f"radio_{estudiante_id}_{grupo}",
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    
+    # Actualizar el estado si cambia
+    if seleccion != estado_actual:
+        st.session_state.Asistencias[estudiante_id] = seleccion
+        st.rerun()
+    
+    return seleccion
 
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+# Interfaz Principal
+#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+# Aplicar estilos
+aplicar_estilos()
+
+st.title("Control de Asistencia - Quinto Año")
+
+# Selector de grupo
 col1, col2 = st.columns([1,3])
 
 with col1:
-    st.write("**Seleccionar Grupo:**")
+    st.write("**Grupo:**")
 
 with col2:
     grupo = st.radio(
-        "Grupo",
+        "Seleccionar Grupo",
         ["A","B","C"],
         index=0 if st.session_state.GrupoSeleccionado=="A"
         else 1 if st.session_state.GrupoSeleccionado=="B"
         else 2,
         horizontal=True,
-        key="grupo_radio"
+        label_visibility="collapsed"
     )
 
 if grupo != st.session_state.GrupoSeleccionado:
     CambiarGrupo(grupo)
 
+# Informacion del grupo
 st.write(
     f"**Grupo {st.session_state.GrupoSeleccionado} - "
     f"{len(st.session_state.EstudiantesActuales)} estudiantes**"
@@ -116,116 +200,30 @@ st.write(f"**Fecha y Hora:** {FechaHora}")
 
 st.divider()
 
-st.subheader("📋 Registro de Asistencia")
+st.subheader("Registro de Asistencia")
 
-# Aplicar estilos CSS
-aplicar_estilos_botones()
-
-# Crear contenedores para cada estudiante
-for idx, estudiante in enumerate(st.session_state.EstudiantesActuales):
+# Lista de estudiantes
+for estudiante in st.session_state.EstudiantesActuales:
     numero = estudiante["numero"]
     nombre = estudiante["nombre"]
     estado_actual = st.session_state.Asistencias[numero]
-
-    col1, col2, col3, col4 = st.columns([1,4,1,1])
-
-    with col1:
-        st.write(f"**{numero}**")
-
-    with col2:
-        st.write(nombre)
-
-    with col3:
-        # Botón Presente
-        if st.button("✅ Presente", key=f"P_{numero}_{grupo}_{idx}"):
-            st.session_state.Asistencias[numero] = "Presente"
-            st.rerun()
+    
+    # Crear un contenedor para cada estudiante
+    with st.container():
+        col1, col2, col3 = st.columns([1, 3, 5])
         
-        # Aplicar estilo activo usando JavaScript
-        if estado_actual == "Presente":
-            st.markdown(f"""
-            <script>
-                (function() {{
-                    const buttons = document.querySelectorAll('button');
-                    for (let btn of buttons) {{
-                        if (btn.textContent.trim() === '✅ Presente' && 
-                            btn.id && btn.id.includes('P_{numero}_{grupo}_{idx}')) {{
-                            btn.style.backgroundColor = '#1F77B4';
-                            btn.style.color = 'white';
-                            btn.style.border = '2px solid #1F77B4';
-                            btn.style.transform = 'scale(1.05)';
-                            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-                            btn.style.fontWeight = 'bold';
-                        }}
-                    }}
-                }})();
-            </script>
-            """, unsafe_allow_html=True)
-        else:
-            # Restaurar estilo normal si no está activo
-            st.markdown(f"""
-            <script>
-                (function() {{
-                    const buttons = document.querySelectorAll('button');
-                    for (let btn of buttons) {{
-                        if (btn.textContent.trim() === '✅ Presente' && 
-                            btn.id && btn.id.includes('P_{numero}_{grupo}_{idx}')) {{
-                            btn.style.backgroundColor = '#e0e0e0';
-                            btn.style.color = '#333333';
-                            btn.style.border = '2px solid #cccccc';
-                            btn.style.transform = 'scale(1)';
-                            btn.style.boxShadow = 'none';
-                        }}
-                    }}
-                }})();
-            </script>
-            """, unsafe_allow_html=True)
-
-    with col4:
-        # Botón Tardanza
-        if st.button("⏰ Tardanza", key=f"T_{numero}_{grupo}_{idx}"):
-            st.session_state.Asistencias[numero] = "Tardanza"
-            st.rerun()
+        with col1:
+            st.write(f"**{numero}**")
         
-        # Aplicar estilo activo usando JavaScript
-        if estado_actual == "Tardanza":
-            st.markdown(f"""
-            <script>
-                (function() {{
-                    const buttons = document.querySelectorAll('button');
-                    for (let btn of buttons) {{
-                        if (btn.textContent.trim() === '⏰ Tardanza' && 
-                            btn.id && btn.id.includes('T_{numero}_{grupo}_{idx}')) {{
-                            btn.style.backgroundColor = '#22C55E';
-                            btn.style.color = 'white';
-                            btn.style.border = '2px solid #22C55E';
-                            btn.style.transform = 'scale(1.05)';
-                            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-                            btn.style.fontWeight = 'bold';
-                        }}
-                    }}
-                }})();
-            </script>
-            """, unsafe_allow_html=True)
-        else:
-            # Restaurar estilo normal si no está activo
-            st.markdown(f"""
-            <script>
-                (function() {{
-                    const buttons = document.querySelectorAll('button');
-                    for (let btn of buttons) {{
-                        if (btn.textContent.trim() === '⏰ Tardanza' && 
-                            btn.id && btn.id.includes('T_{numero}_{grupo}_{idx}')) {{
-                            btn.style.backgroundColor = '#e0e0e0';
-                            btn.style.color = '#333333';
-                            btn.style.border = '2px solid #cccccc';
-                            btn.style.transform = 'scale(1)';
-                            btn.style.boxShadow = 'none';
-                        }}
-                    }}
-                }})();
-            </script>
-            """, unsafe_allow_html=True)
+        with col2:
+            st.write(nombre)
+        
+        with col3:
+            # Selector de asistencia con radio buttons
+            crear_selector_asistencia(numero, estado_actual, st.session_state.GrupoSeleccionado)
+        
+        # Linea separadora sutil
+        st.markdown("---")
 
 st.divider()
 
@@ -233,11 +231,13 @@ st.divider()
 # Resumen de Asistencia
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-st.subheader("📊 Resumen de Asistencia")
+st.subheader("Resumen de Asistencia")
 
+# Contar estados
 ContadorPresentes = 0
 ContadorTardanzas = 0
 ContadorAusentes = 0
+ContadorJustificados = 0
 
 for estudiante in st.session_state.EstudiantesActuales:
     estado = st.session_state.Asistencias[estudiante["numero"]]
@@ -245,82 +245,55 @@ for estudiante in st.session_state.EstudiantesActuales:
         ContadorPresentes += 1
     elif estado == "Tardanza":
         ContadorTardanzas += 1
+    elif estado == "Justificado":
+        ContadorJustificados += 1
     else:
         ContadorAusentes += 1
 
-# Crear columnas con colores
-col1, col2, col3 = st.columns(3)
+# Mostrar metricas
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(f"""
-    <div style="
-        background-color: #1F77B4; 
-        padding: 20px; 
-        border-radius: 10px; 
-        text-align: center;
-        color: white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    ">
-        <h3 style="margin:0; color: white;">✅ Presentes</h3>
-        <h1 style="margin:0; color: white; font-size: 3rem;">{ContadorPresentes}</h1>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Presentes", ContadorPresentes, 
+              delta=None, delta_color="normal")
 
 with col2:
-    st.markdown(f"""
-    <div style="
-        background-color: #22C55E; 
-        padding: 20px; 
-        border-radius: 10px; 
-        text-align: center;
-        color: white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    ">
-        <h3 style="margin:0; color: white;">⏰ Tardanzas</h3>
-        <h1 style="margin:0; color: white; font-size: 3rem;">{ContadorTardanzas}</h1>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Tardanzas", ContadorTardanzas,
+              delta=None, delta_color="normal")
 
 with col3:
-    st.markdown(f"""
-    <div style="
-        background-color: #dc3545; 
-        padding: 20px; 
-        border-radius: 10px; 
-        text-align: center;
-        color: white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    ">
-        <h3 style="margin:0; color: white;">❌ Ausentes</h3>
-        <h1 style="margin:0; color: white; font-size: 3rem;">{ContadorAusentes}</h1>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Ausentes", ContadorAusentes,
+              delta=None, delta_color="normal")
+
+with col4:
+    st.metric("Justificados", ContadorJustificados,
+              delta=None, delta_color="normal")
 
 st.divider()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Botones de acción
+# Botones de accion
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("💾 Guardar Asistencia", key="guardar_asistencia", use_container_width=True):
+    if st.button("Guardar Asistencia", use_container_width=True):
         try:
             GuardarAsistencia(
                 st.session_state.GrupoSeleccionado,
                 st.session_state.EstudiantesActuales,
                 st.session_state.Asistencias
             )
-            st.success("✅ La asistencia fue guardada correctamente.")
+            st.success("La asistencia fue guardada correctamente.")
         except Exception as e:
-            st.error(f"❌ Error al guardar: {e}")
+            st.error(f"Error al guardar: {e}")
 
 with col2:
-    if st.button("🔄 Reiniciar Asistencia", key="reiniciar_asistencia", use_container_width=True):
+    if st.button("Reiniciar Asistencia", use_container_width=True):
         for estudiante in st.session_state.EstudiantesActuales:
             st.session_state.Asistencias[estudiante["numero"]] = "Ausente"
-        st.success("🔄 Asistencia reiniciada.")
+        st.success("Asistencia reiniciada.")
         st.rerun()
 
 st.divider()
@@ -329,7 +302,7 @@ st.divider()
 # Vista previa y descarga
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-VerVistaPrevia = st.checkbox("📊 Ver vista previa antes de descargar")
+VerVistaPrevia = st.checkbox("Ver vista previa antes de descargar")
 
 if VerVistaPrevia:
     FilasPreview = []
@@ -337,22 +310,15 @@ if VerVistaPrevia:
         num = estudiante["numero"]
         nombre = estudiante["nombre"]
         estado = st.session_state.Asistencias[num]
-        # Asignar emoji según estado
-        if estado == "Presente":
-            estado_display = "✅ Presente"
-        elif estado == "Tardanza":
-            estado_display = "⏰ Tardanza"
-        else:
-            estado_display = "❌ Ausente"
-        FilasPreview.append({"N°": num, "Nombre": nombre, "Estado": estado_display})
+        FilasPreview.append({"N°": num, "Nombre": nombre, "Estado": estado})
 
     DfPreview = pd.DataFrame(FilasPreview)
     st.dataframe(DfPreview, hide_index=True, use_container_width=True)
     
-    # Botón para descargar CSV
+    # Boton de descarga
     csv = DfPreview.to_csv(index=False)
     st.download_button(
-        label="📥 Descargar CSV",
+        label="Descargar CSV",
         data=csv,
         file_name=f"asistencia_grupo_{st.session_state.GrupoSeleccionado}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
         mime="text/csv",
