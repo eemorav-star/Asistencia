@@ -38,19 +38,90 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CSS para estilos generales de la interfaz
+# CSS para estilos profesionales y colores del círculo
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def aplicar_estilos():
     st.markdown("""
     <style>
-        /* Estilos para la tabla de vista previa */
+        /* Estilo para el contenedor de radio buttons */
+        .stRadio > div {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        /* Ocultar el label principal del grupo de radio buttons */
+        .stRadio label {
+            display: none !important;
+        }
+        
+        /* Estilo general para los botones/etiquetas */
+        .stRadio > div > label {
+            display: inline-flex !important;
+            align-items: center;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            background-color: #f5f5f5;
+            color: #555555;
+            margin: 2px;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        /* Efecto hover */
+        .stRadio > div > label:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* ========================================================
+           COLORES DE LOS CÍRCULOS (accent-color) Y FONDOS
+           ======================================================== */
+
+        /* PRESENTE -> Círculo Azul (#1F77B4) */
+        .stRadio > div > label:has(input[value="Presente"]) input[type="radio"] {
+            accent-color: #1F77B4 !important;
+        }
+        .stRadio > div > label:has(input[value="Presente"]:checked) {
+            border-color: #1F77B4 !important;
+            background-color: #e8f4f8 !important;
+            color: #1F77B4 !important;
+        }
+
+        /* TARDANZA -> Círculo Verde (#22C55E) */
+        .stRadio > div > label:has(input[value="Tardanza"]) input[type="radio"] {
+            accent-color: #22C55E !important;
+        }
+        .stRadio > div > label:has(input[value="Tardanza"]:checked) {
+            border-color: #22C55E !important;
+            background-color: #eefdf4 !important;
+            color: #15803d !important;
+        }
+
+        /* AUSENTE -> Círculo Rojo (#DC3545) */
+        .stRadio > div > label:has(input[value="Ausente"]) input[type="radio"] {
+            accent-color: #dc3545 !important;
+        }
+        .stRadio > div > label:has(input[value="Ausente"]:checked) {
+            border-color: #dc3545 !important;
+            background-color: #fde8e8 !important;
+            color: #dc3545 !important;
+        }
+        
+        /* Mejorar la tabla de vista previa */
         .stDataFrame {
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
-        /* Estilos para las tarjetas de métricas */
+        /* Mejorar métricas */
         div[data-testid="metric-container"] {
             background-color: #f8f9fa;
             padding: 16px;
@@ -61,80 +132,47 @@ def aplicar_estilos():
     """, unsafe_allow_html=True)
 
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Funcion para crear selector de asistencia con botones dinamicos
+# Funcion para crear radio buttons personalizados
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
-    col1, col2, col3 = st.columns(3)
-
-    # Colores según el estado seleccionado:
-    # Presente -> Azul (#1F77B4), Tardanza -> Verde (#22C55E), Ausente -> Rojo (#DC3545)
-    color_presente = "#1F77B4" if estado_actual == "Presente" else "#F1F3F4"
-    color_tardanza = "#22C55E" if estado_actual == "Tardanza" else "#F1F3F4"
-    color_ausente  = "#DC3545" if estado_actual == "Ausente" else "#F1F3F4"
-
-    # Estilos dinámicos para los tres botones de este estudiante
-    st.markdown(f"""
-    <style>
-    div[data-testid="stHorizontalBlock"] button {{
-        font-weight: bold;
-        border-radius: 8px;
-        height: 40px;
-        border: 1px solid #d1d5db;
-        transition: all 0.2s ease;
-    }}
-
-    div[data-testid="stHorizontalBlock"] > div:nth-child(1) button {{
-        background-color: {color_presente} !important;
-        color: {"white" if estado_actual == "Presente" else "#333333"} !important;
-        border-color: {"#1F77B4" if estado_actual == "Presente" else "#d1d5db"} !important;
-    }}
-
-    div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {{
-        background-color: {color_tardanza} !important;
-        color: {"white" if estado_actual == "Tardanza" else "#333333"} !important;
-        border-color: {"#22C55E" if estado_actual == "Tardanza" else "#d1d5db"} !important;
-    }}
-
-    div[data-testid="stHorizontalBlock"] > div:nth-child(3) button {{
-        background-color: {color_ausente} !important;
-        color: {"white" if estado_actual == "Ausente" else "#333333"} !important;
-        border-color: {"#DC3545" if estado_actual == "Ausente" else "#d1d5db"} !important;
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-
-    with col1:
-        if st.button("Presente", key=f"P_{estudiante_id}_{grupo}", use_container_width=True):
-            st.session_state.Asistencias[estudiante_id] = "Presente"
-            st.rerun()
-
-    with col2:
-        if st.button("Tardanza", key=f"T_{estudiante_id}_{grupo}", use_container_width=True):
-            st.session_state.Asistencias[estudiante_id] = "Tardanza"
-            st.rerun()
-
-    with col3:
-        if st.button("Ausente", key=f"A_{estudiante_id}_{grupo}", use_container_width=True):
-            st.session_state.Asistencias[estudiante_id] = "Ausente"
-            st.rerun()
+    """
+    Crea un selector de asistencia usando radio buttons con estilo personalizado
+    """
+    opciones = ["Presente", "Tardanza", "Ausente"]
+    
+    seleccion = st.radio(
+        label=f"Asistencia_{estudiante_id}",
+        options=opciones,
+        index=opciones.index(estado_actual) if estado_actual in opciones else 0,
+        key=f"radio_{estudiante_id}_{grupo}",
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    
+    if seleccion != estado_actual:
+        st.session_state.Asistencias[estudiante_id] = seleccion
+        st.rerun()
+    
+    return seleccion
 
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Interfaz Principal
 # ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
+# Aplicar estilos CSS personalizados
 aplicar_estilos()
 
 st.title("Control de Asistencia - Quinto Año")
 
-# Selector de grupo usando st.segmented_control (o botones si se prefiere)
+# Selector de grupo
 col1, col2 = st.columns([1, 3])
 
 with col1:
     st.write("**Grupo:**")
 
 with col2:
-    grupo_sel = st.radio(
+    grupo = st.radio(
         "Seleccionar Grupo",
         ["A", "B", "C"],
         index=0 if st.session_state.GrupoSeleccionado == "A"
@@ -144,8 +182,8 @@ with col2:
         label_visibility="collapsed"
     )
 
-if grupo_sel != st.session_state.GrupoSeleccionado:
-    CambiarGrupo(grupo_sel)
+if grupo != st.session_state.GrupoSeleccionado:
+    CambiarGrupo(grupo)
 
 # Informacion del grupo
 st.write(
@@ -176,12 +214,7 @@ for estudiante in st.session_state.EstudiantesActuales:
             st.write(nombre)
         
         with col3:
-            # Reutilizando exactamente la misma firma de llamada
-            crear_selector_asistencia(
-                numero,
-                estado_actual,
-                st.session_state.GrupoSeleccionado
-            )
+            crear_selector_asistencia(numero, estado_actual, st.session_state.GrupoSeleccionado)
         
         st.markdown("---")
 
@@ -226,7 +259,7 @@ st.divider()
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("Guardar Asistencia", use_container_width=True, type="primary"):
+    if st.button("Guardar Asistencia", use_container_width=True):
         try:
             GuardarAsistencia(
                 st.session_state.GrupoSeleccionado,
