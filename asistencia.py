@@ -48,8 +48,9 @@ def aplicar_estilos():
         .stRadio > div {
             display: flex;
             flex-direction: row;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
         
         /* Ocultar el label del radio */
@@ -57,30 +58,33 @@ def aplicar_estilos():
             display: none !important;
         }
         
-        /* Estilo para los radio buttons */
+        /* Estilo para los radio buttons - formato etiqueta */
         .stRadio > div > label {
             display: inline-block !important;
-            padding: 6px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
+            padding: 4px 16px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid #e0e0e0;
-            background-color: #f5f5f5;
-            color: #555555;
+            border: 2px solid #d1d5db;
+            background-color: #f3f4f6;
+            color: #6b7280;
             margin: 2px;
             min-width: 80px;
             text-align: center;
+            font-family: 'Source Sans Pro', sans-serif;
+            letter-spacing: 0.3px;
         }
         
         /* Efecto hover */
         .stRadio > div > label:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #9ca3af;
         }
         
-        /* Estilo para boton seleccionado - Presente */
+        /* Estilo para boton seleccionado - Presente (Azul) */
         .stRadio > div > label:has(input[value="Presente"]:checked) {
             background-color: #1F77B4 !important;
             color: white !important;
@@ -89,7 +93,7 @@ def aplicar_estilos():
             box-shadow: 0 4px 12px rgba(31, 119, 180, 0.3);
         }
         
-        /* Estilo para boton seleccionado - Tardanza */
+        /* Estilo para boton seleccionado - Tardanza (Verde) */
         .stRadio > div > label:has(input[value="Tardanza"]:checked) {
             background-color: #22C55E !important;
             color: white !important;
@@ -98,13 +102,25 @@ def aplicar_estilos():
             box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
         
-        /* Estilo para boton seleccionado - Ausente */
+        /* Estilo para boton seleccionado - Ausente (Rojo) */
         .stRadio > div > label:has(input[value="Ausente"]:checked) {
             background-color: #dc3545 !important;
             color: white !important;
             border-color: #dc3545 !important;
             transform: scale(1.05);
             box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        
+        /* Mejorar el contenedor de cada estudiante */
+        div[data-testid="column"] {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Estilo para el nombre del estudiante */
+        .estudiante-nombre {
+            font-weight: 500;
+            color: #1f2937;
         }
         
         /* Mejorar la tabla de vista previa */
@@ -120,6 +136,13 @@ def aplicar_estilos():
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        
+        /* Separador sutil */
+        hr {
+            margin: 8px 0;
+            border: none;
+            border-top: 1px solid #e5e7eb;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -131,14 +154,14 @@ def crear_selector_asistencia(estudiante_id, estado_actual, grupo):
     """
     Crea un selector de asistencia usando radio buttons con estilo personalizado
     """
-    # Opciones de asistencia (sin Justificado)
+    # Opciones de asistencia
     opciones = ["Presente", "Tardanza", "Ausente"]
     
     # Crear radio button horizontal
     seleccion = st.radio(
         label=f"Asistencia_{estudiante_id}",
         options=opciones,
-        index=opciones.index(estado_actual) if estado_actual in opciones else 0,
+        index=opciones.index(estado_actual) if estado_actual in opciones else 2,
         key=f"radio_{estudiante_id}_{grupo}",
         horizontal=True,
         label_visibility="collapsed"
@@ -161,7 +184,7 @@ aplicar_estilos()
 st.title("Control de Asistencia - Quinto Año")
 
 # Selector de grupo
-col1, col2 = st.columns([1,3])
+col1, col2 = st.columns([1, 4])
 
 with col1:
     st.write("**Grupo:**")
@@ -169,7 +192,7 @@ with col1:
 with col2:
     grupo = st.radio(
         "Seleccionar Grupo",
-        ["A","B","C"],
+        ["A", "B", "C"],
         index=0 if st.session_state.GrupoSeleccionado=="A"
         else 1 if st.session_state.GrupoSeleccionado=="B"
         else 2,
@@ -194,27 +217,28 @@ st.divider()
 st.subheader("Registro de Asistencia")
 
 # Lista de estudiantes
-for estudiante in st.session_state.EstudiantesActuales:
+for idx, estudiante in enumerate(st.session_state.EstudiantesActuales):
     numero = estudiante["numero"]
     nombre = estudiante["nombre"]
     estado_actual = st.session_state.Asistencias[numero]
     
-    # Crear un contenedor para cada estudiante
+    # Crear un contenedor para cada estudiante con formato tipo lista
     with st.container():
-        col1, col2, col3 = st.columns([1, 3, 5])
+        col1, col2, col3 = st.columns([0.5, 2.5, 7])
         
         with col1:
-            st.write(f"**{numero}**")
+            st.write(f"**{numero}.**")
         
         with col2:
-            st.write(nombre)
+            st.write(f"**{nombre}**")
         
         with col3:
             # Selector de asistencia con radio buttons
             crear_selector_asistencia(numero, estado_actual, st.session_state.GrupoSeleccionado)
         
-        # Linea separadora sutil
-        st.markdown("---")
+        # Linea separadora sutil (excepto después del ultimo)
+        if idx < len(st.session_state.EstudiantesActuales) - 1:
+            st.markdown("---")
 
 st.divider()
 
@@ -238,17 +262,53 @@ for estudiante in st.session_state.EstudiantesActuales:
     else:
         ContadorAusentes += 1
 
-# Mostrar metricas
+# Mostrar metricas con colores
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Presentes", ContadorPresentes)
+    st.markdown(f"""
+    <div style="
+        background-color: #1F77B4; 
+        padding: 15px; 
+        border-radius: 10px; 
+        text-align: center;
+        color: white;
+        box-shadow: 0 2px 8px rgba(31, 119, 180, 0.2);
+    ">
+        <div style="font-size: 14px; opacity: 0.9;">Presentes</div>
+        <div style="font-size: 28px; font-weight: bold;">{ContadorPresentes}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col2:
-    st.metric("Tardanzas", ContadorTardanzas)
+    st.markdown(f"""
+    <div style="
+        background-color: #22C55E; 
+        padding: 15px; 
+        border-radius: 10px; 
+        text-align: center;
+        color: white;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+    ">
+        <div style="font-size: 14px; opacity: 0.9;">Tardanzas</div>
+        <div style="font-size: 28px; font-weight: bold;">{ContadorTardanzas}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col3:
-    st.metric("Ausentes", ContadorAusentes)
+    st.markdown(f"""
+    <div style="
+        background-color: #dc3545; 
+        padding: 15px; 
+        border-radius: 10px; 
+        text-align: center;
+        color: white;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+    ">
+        <div style="font-size: 14px; opacity: 0.9;">Ausentes</div>
+        <div style="font-size: 28px; font-weight: bold;">{ContadorAusentes}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.divider()
 
