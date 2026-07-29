@@ -9,7 +9,6 @@ import pandas as pd
 from datetime import datetime
 from grupos import GrupoA, Grupos
 from exc import GuardarAsistencia
-import urllib.parse
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Inicializar estado de la sesion
@@ -67,40 +66,43 @@ def crear_boton_personalizado(texto, estudiante_id, grupo, estado_actual, tipo):
     """
     if tipo == "presente":
         color_activo = "#A4DE02"
-        color_inactivo = "#cccccc"
+        color_inactivo = "#e0e0e0"
         texto_color_activo = "black"
         texto_color_inactivo = "#333333"
         es_activo = (estado_actual == "Presente")
+        accion_url = "presente"
     else:  # tardanza
         color_activo = "#008CFF"
-        color_inactivo = "#cccccc"
+        color_inactivo = "#e0e0e0"
         texto_color_activo = "white"
         texto_color_inactivo = "#333333"
         es_activo = (estado_actual == "Tardanza")
+        accion_url = "tardanza"
     
     color_fondo = color_activo if es_activo else color_inactivo
     color_texto = texto_color_activo if es_activo else texto_color_inactivo
-    borde = color_activo if es_activo else color_inactivo
+    borde = color_activo if es_activo else "#cccccc"
     escala = "scale(1.05)" if es_activo else "scale(1)"
     sombra = "0 4px 8px rgba(0,0,0,0.2)" if es_activo else "none"
     
     html_boton = f'''
     <button 
-        onclick="window.location.href='?accion={tipo}&estudiante={estudiante_id}&grupo={grupo}'" 
+        onclick="window.location.href='?accion={accion_url}&estudiante={estudiante_id}&grupo={grupo}'" 
         style="
             background-color: {color_fondo};
             color: {color_texto};
             border: 2px solid {borde};
-            padding: 0.4rem 0.8rem;
-            border-radius: 0.5rem;
+            padding: 8px 16px;
+            border-radius: 8px;
             font-weight: bold;
             width: 100%;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
+            font-size: 14px;
             transform: {escala};
             box-shadow: {sombra};
             font-family: 'Source Sans Pro', sans-serif;
+            margin: 2px 0;
         "
         onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'"
         onmouseout="this.style.transform='{escala}';this.style.boxShadow='{sombra}'"
@@ -199,16 +201,13 @@ for estudiante in st.session_state.EstudiantesActuales:
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Presentes", ContadorPresentes, 
-              delta=None, delta_color="normal")
+    st.metric("Presentes", ContadorPresentes)
 
 with col2:
-    st.metric("Tardanzas", ContadorTardanzas,
-              delta=None, delta_color="normal")
+    st.metric("Tardanzas", ContadorTardanzas)
 
 with col3:
-    st.metric("Ausentes", ContadorAusentes,
-              delta=None, delta_color="normal")
+    st.metric("Ausentes", ContadorAusentes)
 
 st.divider()
 
