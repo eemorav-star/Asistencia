@@ -172,15 +172,19 @@ with col1:
     st.write("**Grupo:**")
 
 with col2:
+    # --- MODIFICACIÓN: Ahora incluye grupos D y E ---
     grupo = st.radio(
         "Seleccionar Grupo",
-        ["A", "B", "C"],
+        ["A", "B", "C", "D", "E"],   # <-- Añadidos D y E
         index=0 if st.session_state.GrupoSeleccionado == "A"
         else 1 if st.session_state.GrupoSeleccionado == "B"
-        else 2,
+        else 2 if st.session_state.GrupoSeleccionado == "C"
+        else 3 if st.session_state.GrupoSeleccionado == "D"   # <-- Nuevo
+        else 4,   # para E (índice 4) si no coincide con ninguno anterior
         horizontal=True,
         label_visibility="collapsed"
     )
+    # --- Fin de la modificación ---
 
 if grupo != st.session_state.GrupoSeleccionado:
     CambiarGrupo(grupo)
