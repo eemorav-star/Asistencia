@@ -57,12 +57,12 @@ def CambiarGrupo(grupo):
     st.rerun()
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# Funcion para crear botones con estilo
+# Funcion para crear botones con estilo usando components
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 def crear_boton_asistencia(texto, estudiante_id, grupo, estado_actual, tipo):
     """
-    Crea un boton HTML con estilo dinamico
+    Crea un boton HTML con estilo dinamico usando st.components
     tipo: 'presente', 'tardanza', o 'ausente'
     """
     # Configurar colores segun tipo
@@ -124,59 +124,8 @@ def crear_boton_asistencia(texto, estudiante_id, grupo, estado_actual, tipo):
     return html
 
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-# CSS para estilos adicionales
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-def aplicar_estilos():
-    st.markdown("""
-    <style>
-        /* Estilo para el contenedor de botones */
-        div[data-testid="column"]:nth-child(3) {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        /* Mejorar la tabla de vista previa */
-        .stDataFrame {
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        /* Mejorar metricas */
-        div[data-testid="metric-container"] {
-            background-color: #f8f9fa;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        /* Separador sutil */
-        hr {
-            margin: 8px 0;
-            border: none;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        /* Estilo para el nombre del estudiante */
-        .estudiante-numero {
-            font-weight: 600;
-            color: #374151;
-        }
-        .estudiante-nombre {
-            font-weight: 500;
-            color: #1f2937;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 # Interfaz Principal
 #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-# Aplicar estilos
-aplicar_estilos()
 
 st.title("Control de Asistencia - Quinto Año")
 
@@ -223,13 +172,13 @@ for idx, estudiante in enumerate(st.session_state.EstudiantesActuales):
         col1, col2, col3 = st.columns([0.5, 2.5, 7])
         
         with col1:
-            st.markdown(f'<span class="estudiante-numero">{numero}.</span>', unsafe_allow_html=True)
+            st.write(f"**{numero}.**")
         
         with col2:
-            st.markdown(f'<span class="estudiante-nombre">{nombre}</span>', unsafe_allow_html=True)
+            st.write(f"**{nombre}**")
         
         with col3:
-            # Crear los tres botones
+            # Crear los tres botones usando components
             html_presente = crear_boton_asistencia(
                 "Presente", numero, st.session_state.GrupoSeleccionado, 
                 estado_actual, "presente"
@@ -243,8 +192,10 @@ for idx, estudiante in enumerate(st.session_state.EstudiantesActuales):
                 estado_actual, "ausente"
             )
             
-            # Mostrar los botones
-            st.markdown(html_presente + html_tardanza + html_ausente, unsafe_allow_html=True)
+            # Mostrar los botones con components (mas confiable)
+            st.components.v1.html(html_presente, height=45)
+            st.components.v1.html(html_tardanza, height=45)
+            st.components.v1.html(html_ausente, height=45)
         
         # Linea separadora
         if idx < len(st.session_state.EstudiantesActuales) - 1:
@@ -272,53 +223,17 @@ for estudiante in st.session_state.EstudiantesActuales:
     else:
         ContadorAusentes += 1
 
-# Mostrar metricas con tarjetas de colores
+# Mostrar metricas
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown(f"""
-    <div style="
-        background-color: #1F77B4; 
-        padding: 15px; 
-        border-radius: 10px; 
-        text-align: center;
-        color: white;
-        box-shadow: 0 2px 8px rgba(31, 119, 180, 0.2);
-    ">
-        <div style="font-size: 13px; opacity: 0.9;">Presentes</div>
-        <div style="font-size: 28px; font-weight: bold;">{ContadorPresentes}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Presentes", ContadorPresentes)
 
 with col2:
-    st.markdown(f"""
-    <div style="
-        background-color: #22C55E; 
-        padding: 15px; 
-        border-radius: 10px; 
-        text-align: center;
-        color: white;
-        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
-    ">
-        <div style="font-size: 13px; opacity: 0.9;">Tardanzas</div>
-        <div style="font-size: 28px; font-weight: bold;">{ContadorTardanzas}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Tardanzas", ContadorTardanzas)
 
 with col3:
-    st.markdown(f"""
-    <div style="
-        background-color: #dc3545; 
-        padding: 15px; 
-        border-radius: 10px; 
-        text-align: center;
-        color: white;
-        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
-    ">
-        <div style="font-size: 13px; opacity: 0.9;">Ausentes</div>
-        <div style="font-size: 28px; font-weight: bold;">{ContadorAusentes}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Ausentes", ContadorAusentes)
 
 st.divider()
 
